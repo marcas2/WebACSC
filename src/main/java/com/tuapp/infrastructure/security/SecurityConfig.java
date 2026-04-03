@@ -36,18 +36,19 @@ public class SecurityConfig {
             )
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/auth/login",
-                    "/auth/register",
-                    "/auth/logout",
-                    "/css/**",
-                    "/js/**",
-                    "/images/**",
-                    "/webjars/**",
-                    "/error"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
+            .requestMatchers(
+                "/auth/login",
+                "/auth/register",
+                "/auth/logout",
+                "/api/diagnostics",
+                "/css/**",
+                "/js/**",
+                "/images/**",
+                "/webjars/**",
+                "/error"
+            ).permitAll()
+            .anyRequest().authenticated()
+        )
 
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
