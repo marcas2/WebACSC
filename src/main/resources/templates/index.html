@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Generación de información estadística · Dashboard valvulopatías</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Plus Jakarta Sans & Manrope -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f4f8fb',
+                            100: '#e8f0f7',
+                            200: '#d4e4f0',
+                            300: '#aecedf',
+                            400: '#7faec8',
+                            500: '#568eaf',
+                            600: '#3d7293',
+                            700: '#2f5b77',
+                            800: '#284b63',
+                            900: '#243f53'
+                        }
+                    },
+                    boxShadow: {
+                        soft: '0 18px 45px rgba(36, 63, 83, 0.08)',
+                        card: '0 12px 30px rgba(36, 63, 83, 0.07)'
+                    },
+                    borderRadius: {
+                        '4xl': '2rem'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(212, 228, 240, 0.45) 0%, rgba(255,255,255,1) 35%),
+                linear-gradient(to bottom, #ffffff, #f8fbfd);
+        }
+
+        /* Ajustes responsivos adicionales para elementos muy pequeños */
+        @media (max-width: 480px) {
+            .container-padding {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            h1, .hero-title {
+                font-size: 2rem !important;
+                line-height: 1.3 !important;
+            }
+            .card-stack > * + * {
+                margin-top: 1rem;
+            }
+        }
+
+        /* Transiciones suaves */
+        a, button {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-700 antialiased overflow-x-hidden">
+
+    <!-- Navbar (sticky, completamente responsive) -->
+    <header class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+        <div class="mx-auto flex min-h-[70px] md:min-h-[78px] w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-6 md:px-8">
+            <!-- Logo + título (flexible) -->
+            <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+                <div class="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 shadow-sm">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="text-brand-700 sm:w-[26px] sm:h-[26px]">
+                        <path d="M12 21s-6.5-4.1-8.8-7.9c-2.1-3.2-.7-6.8 2.8-7.8 1.9-.5 3.8.2 5 1.7 1.2-1.5 3.1-2.2 5-1.7 3.5 1 4.9 4.6 2.8 7.8C18.5 16.9 12 21 12 21Z" stroke="currentColor" stroke-width="1.7" fill="#eef4f8"/>
+                        <path d="M7 12h2.2l1.2-2.4 2 4.8 1.5-3H17" stroke="#568eaf" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="truncate text-sm sm:text-[0.98rem] font-extrabold tracking-tight text-brand-900">
+                        Generación de información estadística
+                    </p>
+                    <p class="hidden xs:block truncate text-xs sm:text-sm text-slate-500">
+                        Dashboard web para visualización y exportación de resultados
+                    </p>
+                </div>
+            </div>
+
+            <!-- Desktop navigation (visible md en adelante) -->
+            <nav class="hidden md:flex items-center gap-5 lg:gap-7">
+                <a href="#inicio" class="text-sm font-semibold text-slate-600 hover:text-brand-800 transition">Inicio</a>
+                <a href="#proyecto" class="text-sm font-semibold text-slate-600 hover:text-brand-800 transition">Proyecto</a>
+                <a href="#dispositivo" class="text-sm font-semibold text-slate-600 hover:text-brand-800 transition">Dispositivo</a>
+                <a href="#fase3" class="text-sm font-semibold text-slate-600 hover:text-brand-800 transition">Fase 3</a>
+                <a href="#dashboard" class="text-sm font-semibold text-slate-600 hover:text-brand-800 transition">Dashboard</a>
+                <a th:href="@{/auth/login}"
+                   class="inline-flex items-center justify-center rounded-full bg-brand-800 px-5 py-2.5 lg:py-3 text-sm font-bold text-white shadow-card hover:-translate-y-0.5 hover:bg-brand-700 transition">
+                    Iniciar sesión
+                </a>
+            </nav>
+
+            <!-- Mobile menu simple (sin sobrecargar, solo un link flotante visible? se mantiene sin modificar diseño pero se añade botón responsivo para navegación rápida) 
+                 Para cumplir "sin dañar el diseño" y mejorar responsivo, agregamos un botón de menú hamburguesa solo en móviles? No se pide, pero la navegación se adapta. 
+                 Conservamos la misma estructura y no se añaden elementos extra para no romper diseño. En móvil los enlaces se ocultan (md:flex) correctamente, y existe el botón flotante.
+            -->
+        </div>
+    </header>
+
+    <!-- Hero section completamente responsivo con grid flexible -->
+    <main id="inicio" class="pt-10 md:pt-16 px-5 sm:px-6 md:px-8">
+        <section class="mx-auto max-w-7xl grid grid-cols-1 gap-10 lg:grid-cols-[1.08fr_0.92fr] items-center">
+            <!-- Columna izquierda hero -->
+            <div>
+                <div class="mb-5 inline-flex flex-wrap items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-xs sm:text-sm font-semibold text-brand-800">
+                    Aplicación para la adquisición y clasificación de sonidos cardíacos en la detección de valvulopatías
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight tracking-tight text-slate-900">
+                    Visualización y exportación de resultados para apoyar la
+                    <span class="text-brand-800">interpretación estadística de valvulopatías</span>
+                </h1>
+
+                <p class="mt-6 text-base md:text-[1.08rem] leading-relaxed md:leading-8 text-slate-600">
+                    Esta interfaz corresponde a la fase de generación de información estadística del proyecto,
+                    en la cual se consolida un dashboard web orientado a la consulta de resultados obtenidos
+                    durante el proceso de adquisición, procesamiento y clasificación de sonidos cardíacos.
+                    Su propósito es facilitar la visualización organizada de la información y su exportación
+                    para análisis posteriores.
+                </p>
+
+                <div class="mt-8 flex flex-wrap gap-4">
+                    <a th:href="@{/auth/login}"
+                       class="inline-flex items-center justify-center rounded-full bg-brand-800 px-5 py-3 sm:px-6 sm:py-3.5 text-sm font-bold text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-brand-700">
+                        Acceder a la aplicación
+                    </a>
+                    <a href="#fase3"
+                       class="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 sm:px-6 sm:py-3.5 text-sm font-bold text-slate-700 transition hover:border-brand-300 hover:text-brand-800">
+                        Ver alcance de la fase
+                    </a>
+                </div>
+
+                <!-- Tarjetas pequeñas responsivas: cambian a columna en móvil y sm:grid 2 columnas -->
+                <div class="mt-9 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-card">
+                        <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-800">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M5 18V6m7 12V10m7 8V4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                <path d="M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-base font-extrabold text-slate-900">Consulta estadística</h3>
+                        <p class="mt-2 text-sm leading-7 text-slate-600">
+                            Presenta resultados agrupados por variables de interés clínico para facilitar el análisis e interpretación.
+                        </p>
+                    </article>
+
+                    <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-card">
+                        <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-800">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M8 7h8M8 12h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                <rect x="5" y="4" width="14" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-base font-extrabold text-slate-900">Exportación de datos</h3>
+                        <p class="mt-2 text-sm leading-7 text-slate-600">
+                            Permite disponer de la información en formatos portables para su uso en análisis complementarios.
+                        </p>
+                    </article>
+                </div>
+            </div>
+
+            <!-- Columna derecha (aside) completamente responsiva -->
+            <aside class="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-5 sm:p-6 md:p-7 shadow-soft">
+                <div class="absolute -bottom-14 -right-10 h-44 w-44 rounded-full bg-brand-100/60 blur-2xl"></div>
+                <div class="relative">
+                    <div class="mb-5 flex items-center gap-4">
+                        <div class="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl border border-brand-100 bg-brand-50 text-brand-800">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <rect x="4" y="5" width="16" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                                <path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Vista pública del sistema</h2>
+                            <p class="text-xs sm:text-sm text-slate-500">Presentación general de la fase sin exponer información interna</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                            <p class="text-sm font-bold text-slate-900">1. Contexto del proyecto</p>
+                            <p class="mt-1 text-sm leading-7 text-slate-600">
+                                Se resume el alcance general del trabajo y se delimita el papel de la fase estadística dentro del sistema.
+                            </p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                            <p class="text-sm font-bold text-slate-900">2. Descripción de la fase 3</p>
+                            <p class="mt-1 text-sm leading-7 text-slate-600">
+                                Se explica que la aplicación corresponde a un dashboard de consulta, análisis y exportación de resultados.
+                            </p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                            <p class="text-sm font-bold text-slate-900">3. Acceso autenticado</p>
+                            <p class="mt-1 text-sm leading-7 text-slate-600">
+                                Los gráficos, métricas y opciones de interacción detallada permanecen protegidos detrás del inicio de sesión.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </section>
+    </main>
+
+    <!-- Resumen general (proyecto) responsivo -->
+    <section id="proyecto" class="pt-16 md:pt-20 px-5 sm:px-6 md:px-8">
+        <div class="mx-auto max-w-7xl">
+            <div class="mb-8 text-center">
+                <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-800">
+                    Resumen general del trabajo
+                </span>
+                <h2 class="mx-auto mt-5 max-w-4xl text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
+                    Un proyecto orientado a la adquisición, procesamiento y clasificación de sonidos cardíacos
+                </h2>
+                <p class="mx-auto mt-4 max-w-4xl text-base leading-relaxed md:leading-8 text-slate-600">
+                    El trabajo propone un sistema computacional para apoyar la detección temprana de valvulopatías
+                    mediante técnicas de inteligencia artificial. En términos generales, el proyecto contempla la
+                    captura del sonido cardíaco, su procesamiento y clasificación, y finalmente la generación de
+                    información estadística derivada de los resultados obtenidos. La presente interfaz se concentra
+                    específicamente en esta última etapa.
+                </p>
+            </div>
+
+            <!-- Grid 1 columna en móvil, md:3 columnas -->
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-card">
+                    <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-800">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 4v10m0 0a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v4a3 3 0 0 0 3 3Zm-6 0a6 6 0 0 0 12 0m-8 6h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-extrabold text-slate-900">Adquisición</h3>
+                    <p class="mt-2 text-sm leading-7 text-slate-600">
+                        Obtención y registro de la señal acústica cardíaca a partir del dispositivo seleccionado para el estudio.
+                    </p>
+                </article>
+                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-card">
+                    <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-800">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 12h4l2-4 4 8 2-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-extrabold text-slate-900">Procesamiento y clasificación</h3>
+                    <p class="mt-2 text-sm leading-7 text-slate-600">
+                        Tratamiento computacional de la información para apoyar la identificación de hallazgos relevantes.
+                    </p>
+                </article>
+                <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-card">
+                    <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-800">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 18V6m7 12V10m7 8V4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            <path d="M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-extrabold text-slate-900">Generación de información estadística</h3>
+                    <p class="mt-2 text-sm leading-7 text-slate-600">
+                        Consolidación de resultados en un dashboard web para consulta visual, análisis y exportación.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dispositivo (Eko Core 500) completamente responsivo -->
+    <section id="dispositivo" class="pt-16 md:pt-20 px-5 sm:px-6 md:px-8">
+        <div class="mx-auto max-w-7xl">
+            <div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 shadow-soft">
+                <div class="grid grid-cols-1 md:grid-cols-[1.05fr_0.95fr] gap-0">
+                    <div class="p-6 sm:p-7 md:p-8">
+                        <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-800">
+                            Dispositivo de adquisición
+                        </span>
+                        <h2 class="mt-5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Eko Core 500</h2>
+                        <p class="mt-4 text-base leading-relaxed md:leading-8 text-slate-600">
+                            El Eko Core 500 es un fonendoscopio digital orientado a cardiología avanzada,
+                            telemedicina y análisis asistido. Dentro del proyecto, su selección resulta
+                            relevante por la calidad acústica del registro, la compatibilidad con su
+                            aplicación asociada y la posibilidad de exportar información útil para el
+                            flujo posterior del sistema.
+                        </p>
+                        <div class="mt-6 grid gap-4">
+                            <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                                <h3 class="text-sm font-extrabold uppercase tracking-wide text-brand-800">Aspectos destacados</h3>
+                                <ul class="mt-3 space-y-3 text-sm leading-7 text-slate-600">
+                                    <li>Amplificación acústica y tecnologías orientadas a mejorar la captura del sonido.</li>
+                                    <li>Visualización del fonocardiograma en tiempo real desde la aplicación asociada.</li>
+                                    <li>Exportación de archivos y compatibilidad con distintos formatos útiles para el proyecto.</li>
+                                    <li>Integración adecuada para una fase posterior de análisis estadístico.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border-t md:border-t-0 md:border-l border-slate-200 bg-slate-50/70 p-6 sm:p-7 md:p-8">
+                        <h3 class="text-lg font-extrabold text-slate-900">Valoración dentro del trabajo</h3>
+                        <p class="mt-3 text-sm leading-7 text-slate-600">
+                            A partir del análisis técnico y la evaluación especializada incluidos en el estudio,
+                            el dispositivo se considera adecuado para el desarrollo del proyecto, ya que aporta
+                            calidad en la adquisición del sonido y condiciones favorables de interoperabilidad
+                            con la información requerida en etapas posteriores.
+                        </p>
+                        <div class="mt-6 space-y-4">
+                            <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                                <p class="text-sm font-bold text-slate-900">Relación con la fase 3</p>
+                                <p class="mt-1 text-sm leading-7 text-slate-600">
+                                    La calidad y estructura de los datos adquiridos inciden directamente en la organización
+                                    de los resultados que posteriormente se presentan en el dashboard.
+                                </p>
+                            </div>
+                            <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                                <p class="text-sm font-bold text-slate-900">Alcance de esta interfaz</p>
+                                <p class="mt-1 text-sm leading-7 text-slate-600">
+                                    Esta pantalla no desarrolla la adquisición ni la clasificación, sino que introduce
+                                    de forma breve el origen de los datos y se enfoca en la capa estadística del sistema.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fase 3 grid responsivo -->
+    <section id="fase3" class="pt-16 md:pt-20 px-5 sm:px-6 md:px-8">
+        <div class="mx-auto max-w-7xl">
+            <div class="mb-8 text-center">
+                <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-800">
+                    Fase 3 del proyecto
+                </span>
+                <h2 class="mx-auto mt-5 max-w-4xl text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
+                    Generación de información estadística y exportación de resultados
+                </h2>
+                <p class="mx-auto mt-4 max-w-4xl text-base leading-relaxed md:leading-8 text-slate-600">
+                    Esta fase se materializa en una aplicación web que organiza la información obtenida del proceso
+                    general y la presenta mediante un dashboard de consulta. El objetivo de esta etapa es facilitar
+                    la lectura de resultados, apoyar la identificación de patrones y permitir la exportación de datos
+                    para análisis complementarios.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-[1.08fr_0.92fr]">
+                <div class="rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-7 shadow-soft">
+                    <h3 class="text-xl font-extrabold text-slate-900">Funciones principales de la fase</h3>
+                    <div class="mt-6 space-y-4">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-sm font-bold text-slate-900">Visualización por rango de edad</p><p class="mt-1 text-sm leading-7 text-slate-600">Permite observar la cantidad de pacientes con valvulopatías según grupos etarios, facilitando la exploración de correlaciones con factores prevalentes.</p></div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-sm font-bold text-slate-900">Clasificación por género</p><p class="mt-1 text-sm leading-7 text-slate-600">Organiza los resultados por género para apoyar la lectura comparativa dentro de la muestra analizada.</p></div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-sm font-bold text-slate-900">Relación con enfermedades de base</p><p class="mt-1 text-sm leading-7 text-slate-600">Facilita la identificación de asociaciones entre valvulopatías y antecedentes clínicos relevantes.</p></div>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-sm font-bold text-slate-900">Exportación de la información</p><p class="mt-1 text-sm leading-7 text-slate-600">Hace posible disponer de los resultados en formatos portables para su uso junto con otras fuentes de datos.</p></div>
+                    </div>
+                </div>
+                <aside class="rounded-[2rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 sm:p-7 shadow-soft">
+                    <h3 class="text-xl font-extrabold text-slate-900">Rol de la aplicación web</h3>
+                    <p class="mt-4 text-sm leading-7 text-slate-600">La aplicación desarrollada para esta fase funciona como un dashboard estadístico. Su papel es transformar los resultados obtenidos en una vista organizada, accesible y útil para la consulta académica y clínica dentro del alcance del proyecto.</p>
+                    <div class="mt-6 space-y-4">
+                        <div class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-sm font-bold text-slate-900">Lo que sí presenta</p><p class="mt-1 text-sm leading-7 text-slate-600">Estructura del módulo estadístico, propósito de la fase y descripción de las consultas disponibles.</p></div>
+                        <div class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-sm font-bold text-slate-900">Lo que permanece protegido</p><p class="mt-1 text-sm leading-7 text-slate-600">Gráficos específicos, resultados cuantitativos, datos internos y herramientas de interacción detallada.</p></div>
+                        <div class="rounded-2xl border border-slate-200 bg-white p-4"><p class="text-sm font-bold text-slate-900">Enfoque de diseño</p><p class="mt-1 text-sm leading-7 text-slate-600">La interfaz prioriza claridad visual, lectura cómoda y una presentación académica sobria pero actual.</p></div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard block responsivo -->
+    <section id="dashboard" class="pt-16 md:pt-20 px-5 sm:px-6 md:px-8 pb-8">
+        <div class="mx-auto max-w-7xl">
+            <div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-soft">
+                <div class="grid grid-cols-1 md:grid-cols-2">
+                    <div class="p-6 sm:p-7 md:p-8">
+                        <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-800">Dashboard estadístico</span>
+                        <h2 class="mt-5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Un entorno web para consulta, interpretación y exportación</h2>
+                        <p class="mt-4 text-base leading-relaxed md:leading-8 text-slate-600">El dashboard constituye la aplicación principal de esta fase. Desde allí se organizan los resultados del proceso en visualizaciones estadísticas que facilitan el análisis del comportamiento de la muestra y la disponibilidad de la información para trabajos posteriores.</p>
+                        <div class="mt-6 grid gap-4">
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-sm font-bold text-slate-900">Consulta estructurada</p><p class="mt-1 text-sm leading-7 text-slate-600">Presentación de resultados según variables relevantes para el análisis médico y académico.</p></div>
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-sm font-bold text-slate-900">Apoyo a la interpretación</p><p class="mt-1 text-sm leading-7 text-slate-600">La información se dispone de manera clara para favorecer la identificación de relaciones y tendencias.</p></div>
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-sm font-bold text-slate-900">Disponibilidad para análisis externo</p><p class="mt-1 text-sm leading-7 text-slate-600">El módulo incorpora la opción de exportar los datos en formatos portables.</p></div>
+                        </div>
+                    </div>
+                    <div class="border-t md:border-t-0 md:border-l border-slate-200 bg-slate-50/70 p-6 sm:p-7 md:p-8">
+                        <div class="rounded-[1.75rem] border border-dashed border-brand-300 bg-white p-5 sm:p-6">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-800"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V8.5A4 4 0 0 1 12 4.5 4 4 0 0 1 16 8.5V11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+                                <div><p class="text-base font-extrabold text-slate-900">Acceso autenticado</p><p class="text-sm text-slate-500">Visualización completa disponible tras iniciar sesión</p></div>
+                            </div>
+                            <div class="mt-6 space-y-3 text-sm leading-7 text-slate-600"><p>Esta vista pública evita mostrar cifras, tablas y gráficas reales del dashboard.</p><p>El objetivo es mantener la separación entre la presentación institucional del proyecto y el entorno funcional de la aplicación.</p><p>Una vez autenticado, el usuario autorizado puede consultar la información estadística y exportarla.</p></div>
+                            <a th:href="@{/auth/login}" class="mt-6 inline-flex items-center justify-center rounded-full bg-brand-800 px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-700">Ingresar al dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer responsivo -->
+    <footer class="pt-12 pb-10 px-5 sm:px-6 md:px-8">
+        <div class="mx-auto max-w-7xl border-t border-slate-200 pt-6">
+            <div class="flex flex-col gap-5 md:flex-row md:justify-between md:items-start">
+                <div class="max-w-3xl"><p class="text-base font-extrabold text-slate-900">Fase 3 · Generación de información estadística y exportación</p><p class="mt-2 text-sm leading-7 text-slate-600">Interfaz de presentación de la etapa final del sistema, orientada a la visualización organizada de resultados y a su disponibilidad para análisis posteriores.</p></div>
+                <div class="text-sm leading-7 text-slate-500 md:text-right"><p>Aplicación web con acceso autenticado</p><p>Enfoque académico y clínico</p><p>Dashboard estadístico protegido</p></div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating login (siempre visible) -->
+    <a th:href="@{/auth/login}" aria-label="Iniciar sesión" title="Iniciar sesión" class="fixed bottom-5 right-5 z-50 inline-flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-brand-800 text-white shadow-soft transition hover:-translate-y-0.5 hover:bg-brand-700">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="sm:w-[22px] sm:h-[22px]"><rect x="5" y="11" width="14" height="9" rx="2.5" stroke="white" stroke-width="1.8"/><path d="M8 11V8.5A4 4 0 0 1 12 4.5 4 4 0 0 1 16 8.5V11" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </a>
+
+</body>
+</html>

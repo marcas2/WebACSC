@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Service
 public class RegisterUseCase {
 
+    private static final String DEFAULT_ROLE_NAME = "USER";
+
     private final AuthDomainService authDomainService;
     private final PasswordEncoder passwordEncoder;
     private final RoleJpaRepository roleRepository;
@@ -26,18 +28,36 @@ public class RegisterUseCase {
     }
 
     public User execute(RegisterRequest request) {
-        String hashedPassword = passwordEncoder.encode(request.getPassword());
+        String username = request.getUsername() != null ? request.getUsername().trim() : "";
+        String email = request.getEmail() != null ? request.getEmail().trim().toLowerCase() : "";
+        String rawPassword = request.getPassword();
 
-        RoleEntity defaultRole = roleRepository.findByName("USUARIO")
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+        if (username.isBlank()) {
+            throw new IllegalArgumentException("El usuario es requerido.");
+        }
+
+        if (email.isBlank()) {
+            throw new IllegalArgumentException("El email es requerido.");
+        }
+
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new IllegalArgumentException("La contraseña es requerida.");
+        }
+
+        RoleEntity defaultRole = roleRepository.findByName(DEFAULT_ROLE_NAME)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No se encontró el rol por defecto para el registro."
+                ));
+
+        String hashedPassword = passwordEncoder.encode(rawPassword);
 
         User newUser = new User(
                 null,
-                request.getUsername(),
-                request.getEmail(),
+                username,
+                email,
                 hashedPassword,
-                defaultRole.getId(),
-                defaultRole.getName(),
+                defaultRole.getId(),      // debería ser 3
+                defaultRole.getName(),    // USER
                 LocalDateTime.now()
         );
 

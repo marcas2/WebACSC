@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Médico</title>
@@ -139,6 +140,12 @@
             Bienvenido, <strong th:text="${username}"></strong>
             &nbsp;·&nbsp; Rol: <strong th:text="${role}"></strong>
         </p>
+    </div>
+    <div sec:authorize="hasAnyAuthority('ROLE_SUPER_USER','ROLE_ADMIN')" style="padding: 0 2rem 1rem;">
+        <a th:href="@{/dashboard/users}"
+        style="padding: 8px 16px; border-radius: 6px; background: #1a1a2e; color: #fff; text-decoration: none;">
+            Gestión de usuarios
+        </a>
     </div>
     <a th:href="@{/auth/logout}" class="logout-btn">Cerrar sesión</a>
 </div>

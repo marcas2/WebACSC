@@ -27,30 +27,34 @@ public class AuthController {
 
     @GetMapping("/login")
     public String loginPage(Model model) {
-        model.addAttribute("loginRequest", new LoginRequest());
+        if (!model.containsAttribute("loginRequest")) {
+            model.addAttribute("loginRequest", new LoginRequest());
+        }
         return "login";
     }
 
     @PostMapping("/login")
-    public String login(@Valid @ModelAttribute LoginRequest request,
+    public String login(@Valid @ModelAttribute("loginRequest") LoginRequest request,
                         BindingResult bindingResult,
                         HttpServletResponse response,
                         Model model) {
+
         if (bindingResult.hasErrors()) {
             return "login";
         }
+
         try {
             AuthResponse authResponse = loginUseCase.execute(request);
 
-            // JWT en cookie HttpOnly + Secure (más seguro que localStorage)
             Cookie cookie = new Cookie("jwt", authResponse.getToken());
-            cookie.setHttpOnly(true);   // No accesible desde JS
-            cookie.setSecure(false);    // Cambiar a true en producción (HTTPS)
+            cookie.setHttpOnly(true);
+            cookie.setSecure(false); // true en producción con HTTPS
             cookie.setPath("/");
-            cookie.setMaxAge(86400);    // 24 horas
+            cookie.setMaxAge(86400);
             response.addCookie(cookie);
 
             return "redirect:/dashboard";
+
         } catch (Exception e) {
             model.addAttribute("error", "Usuario o contraseña incorrectos");
             return "login";
@@ -59,34 +63,43 @@ public class AuthController {
 
     @GetMapping("/register")
     public String registerPage(Model model) {
-        model.addAttribute("registerRequest", new RegisterRequest());
+        if (!model.containsAttribute("registerRequest")) {
+            model.addAttribute("registerRequest", new RegisterRequest());
+        }
         return "register";
     }
 
-    @PostMapping("/register")
-    public String register(@Valid @ModelAttribute RegisterRequest request,
-                           BindingResult bindingResult,
-                           Model model) {
-        if (bindingResult.hasErrors()) {
-            return "register";
-        }
-        try {
-            registerUseCase.execute(request);
-            return "redirect:/auth/login?registered=true";
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("error", e.getMessage());
-            return "register";
-        }
+@PostMapping("/register")
+public String register(@Valid @ModelAttribute("registerRequest") RegisterRequest request,
+                       BindingResult bindingResult,
+                       Model model) {
+    if (bindingResult.hasErrors()) {
+        return "register";
     }
+
+    try {
+        registerUseCase.execute(request);
+        return "redirect:/auth/login?registered=true";
+
+    } catch (IllegalArgumentException e) {
+        model.addAttribute("error", e.getMessage());
+        return "register";
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        model.addAttribute("error", "Ocurrió un error interno al registrar el usuario.");
+        return "register";
+    }
+}
 
     @GetMapping("/logout")
     public String logout(HttpServletResponse response) {
-        // Eliminar cookie JWT
         Cookie cookie = new Cookie("jwt", "");
         cookie.setHttpOnly(true);
         cookie.setMaxAge(0);
         cookie.setPath("/");
         response.addCookie(cookie);
+
         return "redirect:/auth/login?logout=true";
     }
 }

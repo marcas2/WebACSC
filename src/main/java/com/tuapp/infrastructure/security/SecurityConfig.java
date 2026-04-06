@@ -25,36 +25,32 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
-
-            // DESACTIVAR completamente los mecanismos por defecto de Spring Security
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
-
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-
             .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/auth/login",
-                "/auth/register",
-                "/auth/logout",
-                "/api/diagnostics",
-                "/css/**",
-                "/js/**",
-                "/images/**",
-                "/webjars/**",
-                "/error"
-            ).permitAll()
-            .anyRequest().authenticated()
-        )
-
+                .requestMatchers(
+                    "/",
+                    "/auth/login",
+                    "/auth/register",
+                    "/auth/logout",
+                    "/api/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/webjars/**",
+                    "/error"
+                ).permitAll()
+                .requestMatchers("/dashboard/users/**").hasAnyRole("SUPER_USER", "ADMIN")
+                .anyRequest().authenticated()
+            )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {
                     String uri = request.getRequestURI();
 
-                    // Evitar redirecciones raras o bucles sobre el propio login
                     if (uri.equals("/auth/login") || uri.equals("/auth/register")) {
                         response.setStatus(200);
                         return;
@@ -63,7 +59,6 @@ public class SecurityConfig {
                     response.sendRedirect("/auth/login");
                 })
             )
-
             .addFilterBefore(
                 new JwtAuthFilter(jwtTokenProvider),
                 UsernamePasswordAuthenticationFilter.class

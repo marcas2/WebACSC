@@ -27,12 +27,18 @@ public class AuthDomainService {
     }
 
     public User registerUser(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("El usuario no puede ser nulo.");
+        }
+
         if (usernameExists(user.getUsername())) {
-            throw new IllegalArgumentException("El nombre de usuario ya existe");
+            throw new IllegalArgumentException("El nombre de usuario ya existe.");
         }
+
         if (emailExists(user.getEmail())) {
-            throw new IllegalArgumentException("El email ya está registrado");
+            throw new IllegalArgumentException("El email ya está registrado.");
         }
+
         return userRepository.save(user);
     }
 }

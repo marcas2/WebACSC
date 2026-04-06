@@ -1,33 +1,473 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Registro</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crear cuenta | Dashboard estadístico</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f4f8fb',
+                            100: '#e8f0f7',
+                            200: '#d4e4f0',
+                            300: '#aecedf',
+                            400: '#7faec8',
+                            500: '#568eaf',
+                            600: '#3d7293',
+                            700: '#2f5b77',
+                            800: '#284b63',
+                            900: '#243f53'
+                        }
+                    },
+                    boxShadow: {
+                        soft: '0 18px 45px rgba(36, 63, 83, 0.08)',
+                        card: '0 12px 30px rgba(36, 63, 83, 0.07)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(212, 228, 240, 0.45) 0%, rgba(255,255,255,1) 35%),
+                linear-gradient(to bottom, #ffffff, #f8fbfd);
+        }
+
+        .requirement-ok {
+            color: #047857;
+        }
+
+        .requirement-fail {
+            color: #64748b;
+        }
+    </style>
 </head>
-<body>
-    <h2>Crear Cuenta</h2>
+<body class="min-h-screen font-sans text-slate-700 antialiased">
 
-    <div th:if="${error}" style="color:red" th:text="${error}"></div>
+    <!-- Top bar -->
+    <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur">
+        <div class="mx-auto flex min-h-[76px] w-[min(100%-24px,1200px)] items-center justify-between gap-5">
+            <a th:href="@{/}" class="flex min-w-0 items-center gap-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 shadow-sm">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true" class="text-brand-700">
+                        <path d="M12 21s-6.5-4.1-8.8-7.9c-2.1-3.2-.7-6.8 2.8-7.8 1.9-.5 3.8.2 5 1.7 1.2-1.5 3.1-2.2 5-1.7 3.5 1 4.9 4.6 2.8 7.8C18.5 16.9 12 21 12 21Z" stroke="currentColor" stroke-width="1.7" fill="#eef4f8"/>
+                        <path d="M7 12h2.2l1.2-2.4 2 4.8 1.5-3H17" stroke="#568eaf" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="truncate text-[0.98rem] font-extrabold tracking-tight text-brand-900">
+                        Dashboard estadístico
+                    </p>
+                    <p class="truncate text-sm text-slate-500">
+                        Registro de acceso a la plataforma
+                    </p>
+                </div>
+            </a>
 
-    <form th:action="@{/auth/register}" th:object="${registerRequest}" method="post">
-        <div>
-            <label>Usuario:</label>
-            <input type="text" th:field="*{username}" required minlength="3"/>
-            <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" style="color:red"></span>
+            <a th:href="@{/}"
+               class="hidden rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:border-brand-300 hover:text-brand-800 md:inline-flex">
+                Volver al inicio
+            </a>
         </div>
-        <div>
-            <label>Email:</label>
-            <input type="email" th:field="*{email}" required/>
-            <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" style="color:red"></span>
-        </div>
-        <div>
-            <label>Contraseña:</label>
-            <input type="password" th:field="*{password}" required minlength="8"/>
-            <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" style="color:red"></span>
-        </div>
-        <button type="submit">Registrarse</button>
-    </form>
+    </header>
 
-    <p>¿Ya tienes cuenta? <a th:href="@{/auth/login}">Inicia sesión</a></p>
+    <!-- Main -->
+    <main class="mx-auto grid min-h-[calc(100vh-76px)] w-[min(100%-24px,1200px)] grid-cols-1 items-center gap-8 py-10 md:grid-cols-[1.02fr_0.98fr] md:py-14">
+
+        <!-- Left panel -->
+        <section class="order-2 md:order-1">
+            <div class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-800">
+                <span class="inline-block h-2 w-2 rounded-full bg-brand-600"></span>
+                Registro con validaciones de calidad
+            </div>
+
+            <h1 class="mt-6 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight text-slate-900 md:text-5xl">
+                Crear una cuenta de
+                <span class="text-brand-800">acceso seguro</span>
+            </h1>
+
+            <p class="mt-6 max-w-2xl text-[1rem] leading-8 text-slate-600">
+                El formulario de registro incorpora criterios básicos de calidad para mejorar la seguridad,
+                la consistencia de los datos y la experiencia de uso. Se valida el formato de usuario,
+                correo electrónico y fortaleza mínima de la contraseña antes de enviar la información.
+            </p>
+
+            <div class="mt-8 grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
+                <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-card">
+                    <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-800">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <rect x="5" y="11" width="14" height="9" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+                            <path d="M8 11V8.5A4 4 0 0 1 12 4.5 4 4 0 0 1 16 8.5V11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-extrabold text-slate-900">Contraseña robusta</h3>
+                    <p class="mt-2 text-sm leading-7 text-slate-600">
+                        Se orienta al usuario para crear una clave con longitud suficiente y combinación de caracteres.
+                    </p>
+                </article>
+
+                <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-card">
+                    <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-800">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M8 7h8M8 12h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            <rect x="5" y="4" width="14" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-extrabold text-slate-900">Datos consistentes</h3>
+                    <p class="mt-2 text-sm leading-7 text-slate-600">
+                        El formulario guía el diligenciamiento con restricciones que reducen errores de captura.
+                    </p>
+                </article>
+
+                <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-card sm:col-span-2">
+                    <div class="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-800">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M4 18c2.4-3.5 5-5.3 8-5.3s5.6 1.8 8 5.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            <circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.8"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-extrabold text-slate-900">Usabilidad y accesibilidad básica</h3>
+                    <p class="mt-2 text-sm leading-7 text-slate-600">
+                        La interfaz usa etiquetas claras, mensajes de ayuda, retroalimentación visual y atributos de formulario orientados a una interacción más comprensible.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Register card -->
+        <section class="order-1 md:order-2">
+            <div class="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-6 shadow-soft sm:p-8">
+                <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-brand-100/50 blur-2xl"></div>
+                <div class="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-slate-100 blur-2xl"></div>
+
+                <div class="relative">
+                    <div class="mb-8 flex items-center gap-4">
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl border border-brand-100 bg-brand-50 text-brand-800">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M4 18c2.4-3.5 5-5.3 8-5.3s5.6 1.8 8 5.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                <circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.8"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-extrabold tracking-tight text-slate-900">Crear cuenta</h2>
+                            <p class="mt-1 text-sm text-slate-500">
+                                Completa los datos para registrarte en la plataforma
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Error backend oculto para SweetAlert -->
+                    <div id="backendError"
+                         th:if="${error}"
+                         th:data-message="${error}"
+                         class="hidden">
+                    </div>
+
+                    <!-- Form -->
+                    <form th:action="@{/auth/register}" th:object="${registerRequest}" method="post" class="space-y-5" novalidate id="registerForm">
+
+                        <div>
+                            <label for="username" class="mb-2 block text-sm font-bold text-slate-800">
+                                Usuario
+                            </label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M4 18c2.4-3.5 5-5.3 8-5.3s5.6 1.8 8 5.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                        <circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.8"/>
+                                    </svg>
+                                </span>
+
+                                <input
+                                    id="username"
+                                    type="text"
+                                    th:field="*{username}"
+                                    required
+                                    minlength="3"
+                                    maxlength="30"
+                                    autocomplete="username"
+                                    inputmode="text"
+                                    pattern="^[a-zA-Z0-9._-]{3,30}$"
+                                    placeholder="Ejemplo: usuario.clinico"
+                                    aria-describedby="usernameHelp"
+                                    class="w-full rounded-2xl border border-slate-300 bg-white py-3.5 pl-12 pr-4 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+                                />
+                            </div>
+                            <p id="usernameHelp" class="mt-2 text-sm text-slate-500">
+                                Usa entre 3 y 30 caracteres. Se permiten letras, números, punto, guion y guion bajo.
+                            </p>
+                            <p th:if="${#fields.hasErrors('username')}"
+                               th:errors="*{username}"
+                               class="mt-2 text-sm font-medium text-rose-600">
+                            </p>
+                        </div>
+
+                        <div>
+                            <label for="email" class="mb-2 block text-sm font-bold text-slate-800">
+                                Correo electrónico
+                            </label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <rect x="4" y="6" width="16" height="12" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+                                        <path d="M5 8l7 5 7-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+
+                                <input
+                                    id="email"
+                                    type="email"
+                                    th:field="*{email}"
+                                    required
+                                    maxlength="120"
+                                    autocomplete="email"
+                                    inputmode="email"
+                                    placeholder="nombre@correo.com"
+                                    aria-describedby="emailHelp"
+                                    class="w-full rounded-2xl border border-slate-300 bg-white py-3.5 pl-12 pr-4 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+                                />
+                            </div>
+                            <p id="emailHelp" class="mt-2 text-sm text-slate-500">
+                                Ingresa un correo válido para identificar tu cuenta.
+                            </p>
+                            <p th:if="${#fields.hasErrors('email')}"
+                               th:errors="*{email}"
+                               class="mt-2 text-sm font-medium text-rose-600">
+                            </p>
+                        </div>
+
+                        <div>
+                            <label for="password" class="mb-2 block text-sm font-bold text-slate-800">
+                                Contraseña
+                            </label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <rect x="5" y="11" width="14" height="9" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+                                        <path d="M8 11V8.5A4 4 0 0 1 12 4.5 4 4 0 0 1 16 8.5V11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+
+                                <input
+                                    id="password"
+                                    type="password"
+                                    th:field="*{password}"
+                                    required
+                                    minlength="8"
+                                    maxlength="64"
+                                    autocomplete="new-password"
+                                    placeholder="Crea una contraseña segura"
+                                    aria-describedby="passwordHelp"
+                                    class="w-full rounded-2xl border border-slate-300 bg-white py-3.5 pl-12 pr-12 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+                                />
+
+                                <button
+                                    type="button"
+                                    id="togglePassword"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 transition hover:text-brand-700"
+                                    aria-label="Mostrar u ocultar contraseña">
+                                    <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" stroke="currentColor" stroke-width="1.8"/>
+                                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <p id="passwordHelp" class="mt-2 text-sm text-slate-500">
+                                La contraseña debe tener al menos 8 caracteres, incluyendo mayúscula, minúscula, número y símbolo.
+                            </p>
+
+                            <div class="mt-4">
+                                <div class="mb-2 flex items-center justify-between">
+                                    <span class="text-sm font-semibold text-slate-700">Fortaleza de la contraseña</span>
+                                    <span id="strengthText" class="text-sm font-semibold text-slate-500">Pendiente</span>
+                                </div>
+
+                                <div class="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                                    <div id="strengthBar" class="h-full w-0 rounded-full transition-all duration-300"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                <p id="reqLength" class="text-sm requirement-fail">• Mínimo 8 caracteres</p>
+                                <p id="reqUpper" class="text-sm requirement-fail">• Al menos una mayúscula</p>
+                                <p id="reqLower" class="text-sm requirement-fail">• Al menos una minúscula</p>
+                                <p id="reqNumber" class="text-sm requirement-fail">• Al menos un número</p>
+                                <p id="reqSpecial" class="text-sm requirement-fail sm:col-span-2">• Al menos un carácter especial</p>
+                            </div>
+
+                            <p th:if="${#fields.hasErrors('password')}"
+                               th:errors="*{password}"
+                               class="mt-2 text-sm font-medium text-rose-600">
+                            </p>
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="inline-flex w-full items-center justify-center rounded-2xl bg-brand-800 px-5 py-3.5 text-sm font-extrabold text-white shadow-card transition hover:-translate-y-0.5 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-100">
+                            Registrarse
+                        </button>
+                    </form>
+
+                    <div class="mt-6 border-t border-slate-200 pt-5">
+                        <p class="text-sm text-slate-600">
+                            ¿Ya tienes cuenta?
+                            <a th:href="@{/auth/login}" class="font-bold text-brand-800 transition hover:text-brand-700 hover:underline">
+                                Inicia sesión
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const passwordInput = document.getElementById('password');
+            const togglePasswordBtn = document.getElementById('togglePassword');
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+
+            const reqLength = document.getElementById('reqLength');
+            const reqUpper = document.getElementById('reqUpper');
+            const reqLower = document.getElementById('reqLower');
+            const reqNumber = document.getElementById('reqNumber');
+            const reqSpecial = document.getElementById('reqSpecial');
+
+            function markRequirement(element, ok) {
+                element.classList.remove('requirement-ok', 'requirement-fail');
+                element.classList.add(ok ? 'requirement-ok' : 'requirement-fail');
+                element.textContent = (ok ? '✓ ' : '• ') + element.textContent.replace(/^[✓•]\s*/, '');
+            }
+
+            function evaluatePassword(value) {
+                const checks = {
+                    length: value.length >= 8,
+                    upper: /[A-ZÁÉÍÓÚÑ]/.test(value),
+                    lower: /[a-záéíóúñ]/.test(value),
+                    number: /\d/.test(value),
+                    special: /[^A-Za-z0-9]/.test(value)
+                };
+
+                markRequirement(reqLength, checks.length);
+                markRequirement(reqUpper, checks.upper);
+                markRequirement(reqLower, checks.lower);
+                markRequirement(reqNumber, checks.number);
+                markRequirement(reqSpecial, checks.special);
+
+                let score = 0;
+                Object.values(checks).forEach(v => { if (v) score++; });
+
+                let width = '0%';
+                let barClass = '';
+                let text = 'Pendiente';
+                let textClass = 'text-slate-500';
+
+                if (value.length === 0) {
+                    width = '0%';
+                    barClass = 'bg-slate-300';
+                    text = 'Pendiente';
+                    textClass = 'text-slate-500';
+                } else if (score <= 2) {
+                    width = '33%';
+                    barClass = 'bg-rose-500';
+                    text = 'Baja';
+                    textClass = 'text-rose-600';
+                } else if (score === 3 || score === 4) {
+                    width = '66%';
+                    barClass = 'bg-amber-500';
+                    text = 'Media';
+                    textClass = 'text-amber-600';
+                } else {
+                    width = '100%';
+                    barClass = 'bg-emerald-500';
+                    text = 'Alta';
+                    textClass = 'text-emerald-600';
+                }
+
+                strengthBar.className = 'h-full rounded-full transition-all duration-300 ' + barClass;
+                strengthBar.style.width = width;
+                strengthText.className = 'text-sm font-semibold ' + textClass;
+                strengthText.textContent = text;
+
+                return checks;
+            }
+
+            function showSweetAlertError(message) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validación requerida',
+                    text: message,
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#284b63',
+                    background: '#ffffff',
+                    color: '#1e293b'
+                });
+            }
+
+            passwordInput.addEventListener('input', function () {
+                evaluatePassword(this.value);
+            });
+
+            togglePasswordBtn.addEventListener('click', function () {
+                const isPassword = passwordInput.getAttribute('type') === 'password';
+                passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+                this.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+            });
+
+            document.getElementById('registerForm').addEventListener('submit', function (e) {
+                const passwordValue = passwordInput.value;
+                const checks = evaluatePassword(passwordValue);
+
+                const validPassword = checks.length && checks.upper && checks.lower && checks.number && checks.special;
+
+                if (!validPassword) {
+                    e.preventDefault();
+                    passwordInput.focus();
+                    showSweetAlertError('La contraseña no cumple con los criterios mínimos de seguridad.');
+                }
+            });
+
+            const backendError = document.getElementById('backendError');
+            if (backendError && backendError.dataset.message) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No fue posible completar el registro',
+                    text: backendError.dataset.message,
+                    confirmButtonText: 'Cerrar',
+                    confirmButtonColor: '#284b63',
+                    background: '#ffffff',
+                    color: '#1e293b'
+                });
+            }
+
+            evaluatePassword(passwordInput.value);
+        })();
+    </script>
 </body>
 </html>

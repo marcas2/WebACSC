@@ -35,11 +35,23 @@ public class UserMapper {
         entity.setPasswordHash(domain.getPasswordHash());
         entity.setCreatedAt(domain.getCreatedAt());
 
-        RoleEntity role = roleRepository.findById(domain.getRoleId())
-                .orElseThrow(() -> new RuntimeException("Rol no encontrado con id: " + domain.getRoleId()));
-
+        RoleEntity role = resolveRole(domain);
         entity.setRole(role);
 
         return entity;
+    }
+
+    private RoleEntity resolveRole(User domain) {
+        if (domain.getRoleId() != null) {
+            return roleRepository.findById(domain.getRoleId())
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado con id: " + domain.getRoleId()));
+        }
+
+        if (domain.getRoleName() != null && !domain.getRoleName().trim().isEmpty()) {
+            return roleRepository.findByName(domain.getRoleName().trim().toUpperCase())
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado con nombre: " + domain.getRoleName()));
+        }
+
+        throw new RuntimeException("El usuario no tiene roleId ni roleName para resolver el rol");
     }
 }

@@ -16,5 +16,6 @@ public class DiagnosticRepositoryAdapter implements DiagnosticRepository {
     @Override
     public DiagnosticEntity save(DiagnosticEntity diagnostic) {
         return diagnosticJpaRepository.save(diagnostic);
+
     }
 }

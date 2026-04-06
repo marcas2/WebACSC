@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de usuarios</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f3f4f8; color: #1a1a2e; }
+        .container { max-width: 1250px; margin: 0 auto; padding: 2rem; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .btn { text-decoration: none; background: #3266ad; color: #fff; padding: 10px 16px; border-radius: 6px; font-size: 14px; border: none; cursor: pointer; }
+        .btn-danger { background: #b53a3a; }
+        .btn-secondary { background: #777; }
+        .message { margin-bottom: 1rem; padding: 12px 14px; border-radius: 8px; font-size: 14px; }
+        .success { background: #edf8f1; border: 1px solid #b8e0c2; color: #2d7a55; }
+        .error { background: #fff4f0; border: 1px solid #f5c4b3; color: #993c1d; }
+        .card { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+        th, td { padding: 12px; border-bottom: 1px solid #eaeef5; text-align: left; vertical-align: top; }
+        th { background: #3266ad; color: #fff; }
+        form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        input, select { padding: 8px 10px; border: 1px solid #d7dce5; border-radius: 6px; }
+        .small { font-size: 12px; color: #666; margin-top: 6px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="topbar">
+        <h1>Gestión de usuarios</h1>
+        <a class="btn btn-secondary" th:href="@{/dashboard}">Volver al dashboard</a>
+    </div>
+
+    <div th:if="${success}" class="message success" th:text="${success}"></div>
+    <div th:if="${error}" class="message error" th:text="${error}"></div>
+
+    <div class="card">
+        <h2 style="margin-top:0;">Crear usuario</h2>
+        <form th:action="@{/dashboard/users/create}" method="post">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Contraseña segura" required>
+            <select name="roleName" required>
+                <option value="USER">USER</option>
+                <option value="ADMIN">ADMIN</option>
+                <option value="SUPER_USER">SUPER_USER</option>
+            </select>
+            <button type="submit" class="btn">Crear usuario</button>
+        </form>
+        <div class="small">La contraseña debe tener mayúscula, minúscula, número y símbolo.</div>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Rol actual</th>
+            <th>Editar</th>
+            <th>Cambiar contraseña</th>
+            <th>Eliminar</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.id}">1</td>
+            <td th:text="${user.username}">usuario</td>
+            <td th:text="${user.email}">correo@correo.com</td>
+            <td th:text="${user.roleName}">USER</td>
+
+            <td>
+                <form th:action="@{/dashboard/users/{id}/edit(id=${user.id})}" method="post">
+                    <input type="text" name="username" th:value="${user.username}" required>
+                    <input type="email" name="email" th:value="${user.email}" required>
+                    <select name="roleName" required>
+                        <option value="USER" th:selected="${user.roleName == 'USER'}">USER</option>
+                        <option value="ADMIN" th:selected="${user.roleName == 'ADMIN'}">ADMIN</option>
+                        <option value="SUPER_USER" th:selected="${user.roleName == 'SUPER_USER'}">SUPER_USER</option>
+                    </select>
+                    <button type="submit" class="btn">Guardar</button>
+                </form>
+            </td>
+
+            <td>
+                <form th:action="@{/dashboard/users/{id}/password(id=${user.id})}" method="post">
+                    <input type="password" name="newPassword" required placeholder="Nueva contraseña">
+                    <button type="submit" class="btn">Cambiar clave</button>
+                </form>
+            </td>
+
+            <td>
+                <form th:action="@{/dashboard/users/{id}/delete(id=${user.id})}" method="post"
+                      onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
