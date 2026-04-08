@@ -135,7 +135,7 @@
 
 <div class="topbar">
     <div>
-        <h1>Dashboard médico</h1>
+        <h1>Dashboard clínico de sonidos cardíacos</h1>
         <p class="meta">
             Bienvenido, <strong th:text="${username}"></strong>
             &nbsp;·&nbsp; Rol: <strong th:text="${role}"></strong>
@@ -177,42 +177,89 @@
 <!-- El resto del dashboard solo se muestra si el reporte está listo -->
 <div th:if="${reportReady}">
 
-    <!-- Metric summary cards -->
+    <div style="margin: 0 2rem 1rem; padding: 14px 16px; background:#fff; border:1px solid #eaeef5; border-radius:10px;">
+        <p style="margin:0 0 6px; font-size:12px; color:#888;">Parámetros de consulta y presentación</p>
+        <p style="margin:0; font-size:13px; color:#1a1a2e;">
+            Cobertura: todos los registros • Comparación: normal/anormal, anomalía, foco e institución • Presentación temporal: agregación mensual.
+        </p>
+    </div>
+
     <div class="metrics">
         <div class="metric">
-            <p class="metric-label">Total valvulopatías</p>
-            <p class="metric-value blue" th:text="${totalValvulopathies}">—</p>
+            <p class="metric-label">HU9 Total de registros</p>
+            <p class="metric-value blue" th:text="${totalRegistros}">0</p>
         </div>
         <div class="metric">
-            <p class="metric-label">Rango más afectado</p>
-            <p class="metric-value orange" th:text="${topAgeRange}">—</p>
+            <p class="metric-label">HU10 Porcentaje normal</p>
+            <p class="metric-value green" th:text="${normalPct} + '%'">0%</p>
         </div>
         <div class="metric">
-            <p class="metric-label">Con enfermedad de base</p>
-            <p class="metric-value green" th:text="${diseaseBasePercent} + '%'">0%</p>
+            <p class="metric-label">HU10 Porcentaje anormal</p>
+            <p class="metric-value orange" th:text="${anormalPct} + '%'">0%</p>
+        </div>
+    </div>
+
+    <div class="metrics" style="padding-top:0;">
+        <div class="metric" style="grid-column: span 3;">
+            <p class="metric-label">HU11 Anomalía más frecuente</p>
+            <p class="metric-value" th:text="${anomaliaTop}">Sin datos</p>
         </div>
     </div>
 
     <div class="charts">
         <div class="card">
             <p class="card-tag"></p>
+            <h2>HU10 Proporción de sonidos normales y anormales</h2>
+            <div class="chart-wrap" style="height:200px"><canvas id="normalChart"></canvas></div>
+            <div class="legend" id="normalLegend"></div>
+        </div>
+
+        <div class="card">
+            <p class="card-tag"></p>
+            <h2>HU11 Registros por tipo de anomalía cardíaca</h2>
+            <div class="chart-wrap"><canvas id="anomaliaChart"></canvas></div>
+            <div class="legend" id="anomaliaLegend"></div>
+        </div>
+
+        <div class="card">
+            <p class="card-tag"></p>
+            <h2>HU12 Registros por foco de auscultación</h2>
+            <div class="chart-wrap"><canvas id="focoChart"></canvas></div>
+            <div class="legend" id="focoLegend"></div>
+        </div>
+
+        <div class="card">
+            <p class="card-tag"></p>
+            <h2>HU13 Registros por institución</h2>
+            <div class="chart-wrap"><canvas id="institucionChart"></canvas></div>
+            <div class="legend" id="institucionLegend"></div>
+        </div>
+
+        <div class="card">
+            <p class="card-tag"></p>
+            <h2>HU14 Evolución temporal de registros</h2>
+            <div class="chart-wrap"><canvas id="timelineChart"></canvas></div>
+        </div>
+
+        <div class="card">
+            <p class="card-tag"></p>
             <h2>Valvulopatías por rango de edad</h2>
-            <div class="chart-wrap"><canvas id="ageChart"></canvas></div>
-            <div class="legend" id="ageLegend"></div>
+            <div class="chart-wrap"><canvas id="valvAgeChart"></canvas></div>
+            <div class="legend" id="valvAgeLegend"></div>
         </div>
 
         <div class="card">
             <p class="card-tag"></p>
             <h2>Valvulopatías por género</h2>
-            <div class="chart-wrap" style="height:200px"><canvas id="genderChart"></canvas></div>
-            <div class="legend" id="genderLegend"></div>
+            <div class="chart-wrap" style="height:200px"><canvas id="valvGenderChart"></canvas></div>
+            <div class="legend" id="valvGenderLegend"></div>
         </div>
 
         <div class="card">
             <p class="card-tag"></p>
             <h2>Valvulopatías y enfermedades de base</h2>
-            <div class="chart-wrap" style="height:200px"><canvas id="diseaseChart"></canvas></div>
-            <div class="legend" id="diseaseLegend"></div>
+            <div class="chart-wrap" style="height:200px"><canvas id="valvDiseaseChart"></canvas></div>
+            <div class="legend" id="valvDiseaseLegend"></div>
         </div>
     </div>
 
@@ -231,17 +278,32 @@
     </div>
 
     <script th:inline="javascript">
-        const ageLabels     = /*[[${ageLabels}]]*/ [];
-        const ageData       = /*[[${ageData}]]*/ [];
-        const genderLabels  = /*[[${genderLabels}]]*/ [];
-        const genderData    = /*[[${genderData}]]*/ [];
-        const diseaseLabels = /*[[${diseaseLabels}]]*/ [];
-        const diseaseData   = /*[[${diseaseData}]]*/ [];
+        const normalLabels      = /*[[${normalStatusLabels}]]*/ [];
+        const normalData        = /*[[${normalStatusData}]]*/ [];
+        const anomaliaLabels    = /*[[${anomaliaLabels}]]*/ [];
+        const anomaliaData      = /*[[${anomaliaData}]]*/ [];
+        const focoLabels        = /*[[${focoLabels}]]*/ [];
+        const focoData          = /*[[${focoData}]]*/ [];
+        const institucionLabels = /*[[${institucionLabels}]]*/ [];
+        const institucionData   = /*[[${institucionData}]]*/ [];
+        const timelineLabels    = /*[[${timelineLabels}]]*/ [];
+        const timelineData      = /*[[${timelineData}]]*/ [];
+        const valvAgeLabels     = /*[[${valvAgeLabels}]]*/ [];
+        const valvAgeData       = /*[[${valvAgeData}]]*/ [];
+        const valvGenderLabels  = /*[[${valvGenderLabels}]]*/ [];
+        const valvGenderData    = /*[[${valvGenderData}]]*/ [];
+        const valvDiseaseLabels = /*[[${valvDiseaseLabels}]]*/ [];
+        const valvDiseaseData   = /*[[${valvDiseaseData}]]*/ [];
 
         const PALETTES = {
-            age:     ['#4A7ED4', '#6AACDC', '#85C9D6', '#A5DEAF'],
-            gender:  ['#5B6FD4', '#CC6B8E'],
-            disease: ['#E2734A', '#7CC4A8'],
+            normal:      ['#2D7A55', '#E2734A'],
+            anomalia:    ['#4A7ED4', '#6AACDC', '#85C9D6', '#A5DEAF', '#5B6FD4', '#CC6B8E', '#D4A35B', '#7CC4A8', '#AA83D4', '#7B9ACC', '#C47A20'],
+            foco:        ['#4A7ED4', '#6AACDC', '#85C9D6', '#A5DEAF'],
+            institucion: ['#5B6FD4', '#CC6B8E', '#7CC4A8', '#D4A35B', '#A5DEAF', '#85C9D6'],
+            timeline:    '#3266ad',
+            valvAge:     ['#4A7ED4', '#6AACDC', '#85C9D6', '#A5DEAF'],
+            valvGender:  ['#5B6FD4', '#CC6B8E'],
+            valvDisease: ['#E2734A', '#7CC4A8']
         };
 
         const gridColor = 'rgba(0,0,0,0.05)';
@@ -259,14 +321,186 @@
             }).join('');
         }
 
-        new Chart(document.getElementById('ageChart'), {
+        new Chart(document.getElementById('normalChart'), {
+            type: 'doughnut',
+            data: {
+                labels: normalLabels,
+                datasets: [{
+                    data: normalData,
+                    backgroundColor: PALETTES.normal,
+                    borderWidth: 0,
+                    hoverOffset: 6,
+                    spacing: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                return ` ${ctx.parsed} registros (${Math.round(ctx.parsed / total * 100)}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        buildLegend('normalLegend', normalLabels, PALETTES.normal, normalData);
+
+        new Chart(document.getElementById('anomaliaChart'), {
             type: 'bar',
             data: {
-                labels: ageLabels,
+                labels: anomaliaLabels,
+                datasets: [{
+                    label: 'Registros',
+                    data: anomaliaData,
+                    backgroundColor: PALETTES.anomalia,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} registros` } }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: tickColor, font: { size: 12 } },
+                        border: { display: false },
+                    },
+                    y: {
+                        grid: { color: gridColor },
+                        ticks: { color: tickColor, font: { size: 12 }, maxTicksLimit: 5 },
+                        border: { display: false },
+                    }
+                }
+            }
+        });
+        buildLegend('anomaliaLegend', anomaliaLabels, PALETTES.anomalia, anomaliaData);
+
+        new Chart(document.getElementById('focoChart'), {
+            type: 'bar',
+            data: {
+                labels: focoLabels,
+                datasets: [{
+                    label: 'Registros',
+                    data: focoData,
+                    backgroundColor: PALETTES.foco,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} registros` } }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: tickColor, font: { size: 12 } },
+                        border: { display: false },
+                    },
+                    y: {
+                        grid: { color: gridColor },
+                        ticks: { color: tickColor, font: { size: 12 }, maxTicksLimit: 5 },
+                        border: { display: false },
+                    }
+                }
+            }
+        });
+        buildLegend('focoLegend', focoLabels, PALETTES.foco, focoData);
+
+        new Chart(document.getElementById('institucionChart'), {
+            type: 'bar',
+            data: {
+                labels: institucionLabels,
+                datasets: [{
+                    label: 'Registros',
+                    data: institucionData,
+                    backgroundColor: PALETTES.institucion,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} registros` } }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: tickColor, font: { size: 11 } },
+                        border: { display: false },
+                    },
+                    y: {
+                        grid: { color: gridColor },
+                        ticks: { color: tickColor, font: { size: 12 }, maxTicksLimit: 5 },
+                        border: { display: false },
+                    }
+                }
+            }
+        });
+        buildLegend('institucionLegend', institucionLabels, PALETTES.institucion, institucionData);
+
+        new Chart(document.getElementById('timelineChart'), {
+            type: 'line',
+            data: {
+                labels: timelineLabels,
+                datasets: [{
+                    label: 'Registros por mes',
+                    data: timelineData,
+                    borderColor: PALETTES.timeline,
+                    backgroundColor: 'rgba(50,102,173,0.15)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} registros` } }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: tickColor, font: { size: 11 } },
+                        border: { display: false },
+                    },
+                    y: {
+                        grid: { color: gridColor },
+                        ticks: { color: tickColor, font: { size: 12 }, maxTicksLimit: 6 },
+                        border: { display: false },
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('valvAgeChart'), {
+            type: 'bar',
+            data: {
+                labels: valvAgeLabels,
                 datasets: [{
                     label: 'Pacientes',
-                    data: ageData,
-                    backgroundColor: PALETTES.age,
+                    data: valvAgeData,
+                    backgroundColor: PALETTES.valvAge,
                     borderRadius: 6,
                     borderSkipped: false,
                 }]
@@ -292,15 +526,15 @@
                 }
             }
         });
-        buildLegend('ageLegend', ageLabels, PALETTES.age, ageData);
+        buildLegend('valvAgeLegend', valvAgeLabels, PALETTES.valvAge, valvAgeData);
 
-        new Chart(document.getElementById('genderChart'), {
+        new Chart(document.getElementById('valvGenderChart'), {
             type: 'doughnut',
             data: {
-                labels: genderLabels,
+                labels: valvGenderLabels,
                 datasets: [{
-                    data: genderData,
-                    backgroundColor: PALETTES.gender,
+                    data: valvGenderData,
+                    backgroundColor: PALETTES.valvGender,
                     borderWidth: 0,
                     hoverOffset: 6,
                     spacing: 2,
@@ -323,15 +557,15 @@
                 }
             }
         });
-        buildLegend('genderLegend', genderLabels, PALETTES.gender, genderData);
+        buildLegend('valvGenderLegend', valvGenderLabels, PALETTES.valvGender, valvGenderData);
 
-        new Chart(document.getElementById('diseaseChart'), {
+        new Chart(document.getElementById('valvDiseaseChart'), {
             type: 'doughnut',
             data: {
-                labels: diseaseLabels,
+                labels: valvDiseaseLabels,
                 datasets: [{
-                    data: diseaseData,
-                    backgroundColor: PALETTES.disease,
+                    data: valvDiseaseData,
+                    backgroundColor: PALETTES.valvDisease,
                     borderWidth: 0,
                     hoverOffset: 6,
                     spacing: 2,
@@ -354,7 +588,7 @@
                 }
             }
         });
-        buildLegend('diseaseLegend', diseaseLabels, PALETTES.disease, diseaseData);
+        buildLegend('valvDiseaseLegend', valvDiseaseLabels, PALETTES.valvDisease, valvDiseaseData);
     </script>
 
 </div>

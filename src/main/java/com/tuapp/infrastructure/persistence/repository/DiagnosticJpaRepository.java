@@ -26,28 +26,7 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
                 WHEN d.age BETWEEN 36 AND 59 THEN '36-59'
                 ELSE '60+'
             END
-        ORDER BY
-            CASE
-                WHEN CASE
-                    WHEN d.age BETWEEN 0 AND 17 THEN '0-17'
-                    WHEN d.age BETWEEN 18 AND 35 THEN '18-35'
-                    WHEN d.age BETWEEN 36 AND 59 THEN '36-59'
-                    ELSE '60+'
-                END = '0-17' THEN 1
-                WHEN CASE
-                    WHEN d.age BETWEEN 0 AND 17 THEN '0-17'
-                    WHEN d.age BETWEEN 18 AND 35 THEN '18-35'
-                    WHEN d.age BETWEEN 36 AND 59 THEN '36-59'
-                    ELSE '60+'
-                END = '18-35' THEN 2
-                WHEN CASE
-                    WHEN d.age BETWEEN 0 AND 17 THEN '0-17'
-                    WHEN d.age BETWEEN 18 AND 35 THEN '18-35'
-                    WHEN d.age BETWEEN 36 AND 59 THEN '36-59'
-                    ELSE '60+'
-                END = '36-59' THEN 3
-                ELSE 4
-            END
+        ORDER BY 1
     """)
     List<Object[]> countValvulopathiesByAgeRange();
 
@@ -63,19 +42,70 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
     @Query("""
         SELECT
             CASE
-                WHEN d.enfermedadesBase IS EMPTY THEN 'SIN ENFERMEDAD DE BASE'
+                WHEN eb.id IS NULL THEN 'SIN ENFERMEDAD DE BASE'
                 ELSE 'CON ENFERMEDAD DE BASE'
             END,
-            COUNT(d)
+            COUNT(DISTINCT d.id)
         FROM DiagnosticEntity d
+        LEFT JOIN d.enfermedadesBase eb
         WHERE d.isNormal = false
         GROUP BY
             CASE
-                WHEN d.enfermedadesBase IS EMPTY THEN 'SIN ENFERMEDAD DE BASE'
+                WHEN eb.id IS NULL THEN 'SIN ENFERMEDAD DE BASE'
                 ELSE 'CON ENFERMEDAD DE BASE'
             END
+        ORDER BY 1
     """)
     List<Object[]> countValvulopathiesByUnderlyingDiseases();
-    // Añadir este método al repositorio existente:
-    long countByIsNormalFalse();
+
+    @Query("""
+        SELECT
+            CASE
+                WHEN d.isNormal = true THEN 'NORMAL'
+                ELSE 'ANORMAL'
+            END,
+            COUNT(d)
+        FROM DiagnosticEntity d
+        GROUP BY
+            CASE
+                WHEN d.isNormal = true THEN 'NORMAL'
+                ELSE 'ANORMAL'
+            END
+        ORDER BY 1
+    """)
+    List<Object[]> countByNormalStatus();
+
+    @Query("""
+        SELECT c.nombre, COUNT(d)
+        FROM DiagnosticEntity d
+        JOIN d.categoriaAnomalia c
+        GROUP BY c.nombre
+        ORDER BY c.nombre
+    """)
+    List<Object[]> countByCategoriaAnomalia();
+
+    @Query("""
+        SELECT f.nombre, COUNT(d)
+        FROM DiagnosticEntity d
+        JOIN d.foco f
+        GROUP BY f.nombre
+        ORDER BY f.nombre
+    """)
+    List<Object[]> countByFoco();
+
+    @Query("""
+        SELECT d.institucion, COUNT(d)
+        FROM DiagnosticEntity d
+        GROUP BY d.institucion
+        ORDER BY d.institucion
+    """)
+    List<Object[]> countByInstitucion();
+
+    @Query(value = """
+        SELECT to_char(date_trunc('month', d.created_at), 'YYYY-MM') AS periodo, COUNT(*)
+        FROM diagnostics d
+        GROUP BY date_trunc('month', d.created_at)
+        ORDER BY date_trunc('month', d.created_at)
+    """, nativeQuery = true)
+    List<Object[]> countByMonth();
 }

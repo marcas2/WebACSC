@@ -8,9 +8,15 @@ import java.util.Map;
 
 public class PdfExportUtil {
 
-    public static byte[] toPdf(Map<String, Long> ageMap,
-                               Map<String, Long> genderMap,
-                               Map<String, Long> diseaseMap) {
+        public static byte[] toPdf(long totalRegistros,
+                                                           Map<String, Long> normalStatusMap,
+                                                           Map<String, Long> categoriaMap,
+                                                           Map<String, Long> focoMap,
+                                                           Map<String, Long> institucionMap,
+                                                           Map<String, Long> timelineMap,
+                                                           Map<String, Long> valvulopathyAgeMap,
+                                                           Map<String, Long> valvulopathyGenderMap,
+                                                           Map<String, Long> valvulopathyDiseaseMap) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
             Document doc = new Document(PageSize.A4, 40, 40, 60, 40);
@@ -34,21 +40,45 @@ public class PdfExportUtil {
                             new BaseColor(26, 26, 46));
 
             Paragraph mainTitle = new Paragraph(
-                    "Reporte estadístico — Valvulopatías", titleFont);
+                    "Reporte estadístico — Sonidos cardíacos", titleFont);
             mainTitle.setAlignment(Element.ALIGN_CENTER);
             mainTitle.setSpacingAfter(20);
             doc.add(mainTitle);
 
+            addSection(doc, "Resumen general del sistema",
+                    "Métrica", Map.of("Total de registros", totalRegistros),
+                    sectionFont, headerFont, bodyFont, totalFont);
+
+            addSection(doc, "Proporción de sonidos normales y anormales",
+                    "Tipo de sonido", normalStatusMap,
+                    sectionFont, headerFont, bodyFont, totalFont);
+
+            addSection(doc, "Registros por tipo de anomalía cardíaca",
+                    "Tipo de anomalía", categoriaMap,
+                    sectionFont, headerFont, bodyFont, totalFont);
+
+            addSection(doc, "Registros por foco de auscultación",
+                    "Foco", focoMap,
+                    sectionFont, headerFont, bodyFont, totalFont);
+
+            addSection(doc, "Registros por institución/hospital",
+                    "Institución", institucionMap,
+                    sectionFont, headerFont, bodyFont, totalFont);
+
+            addSection(doc, "Evolución mensual de registros",
+                    "Periodo", timelineMap,
+                    sectionFont, headerFont, bodyFont, totalFont);
+
             addSection(doc, "Valvulopatías por rango de edad",
-                    "Rango de edad", ageMap,
+                    "Rango de edad", valvulopathyAgeMap,
                     sectionFont, headerFont, bodyFont, totalFont);
 
             addSection(doc, "Valvulopatías por género",
-                    "Género", genderMap,
+                    "Género", valvulopathyGenderMap,
                     sectionFont, headerFont, bodyFont, totalFont);
 
             addSection(doc, "Valvulopatías y enfermedades de base",
-                    "Condición", diseaseMap,
+                    "Condición", valvulopathyDiseaseMap,
                     sectionFont, headerFont, bodyFont, totalFont);
 
             doc.close();

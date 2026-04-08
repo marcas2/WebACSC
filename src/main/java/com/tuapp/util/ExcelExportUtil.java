@@ -8,13 +8,19 @@ import java.util.Map;
 
 public class ExcelExportUtil {
 
-    public static byte[] toExcel(Map<String, Long> ageMap,
-                                 Map<String, Long> genderMap,
-                                 Map<String, Long> diseaseMap) {
+    public static byte[] toExcel(long totalRegistros,
+                                 Map<String, Long> normalStatusMap,
+                                 Map<String, Long> categoriaMap,
+                                 Map<String, Long> focoMap,
+                                 Map<String, Long> institucionMap,
+                                 Map<String, Long> timelineMap,
+                                 Map<String, Long> valvulopathyAgeMap,
+                                 Map<String, Long> valvulopathyGenderMap,
+                                 Map<String, Long> valvulopathyDiseaseMap) {
         try (XSSFWorkbook wb = new XSSFWorkbook();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-            Sheet sheet = wb.createSheet("Reporte Valvulopatías");
+            Sheet sheet = wb.createSheet("Reporte Sonidos Cardiacos");
             sheet.setColumnWidth(0, 9000);
             sheet.setColumnWidth(1, 5000);
 
@@ -40,14 +46,43 @@ public class ExcelExportUtil {
             boldStyle.setFont(boldFont);
 
             int rowNum = 0;
-            rowNum = writeSection(sheet, rowNum, "Valvulopatías por rango de edad",
-                    "Rango de edad", ageMap, headerStyle, titleStyle, boldStyle);
+                Row summaryTitle = sheet.createRow(rowNum++);
+                Cell summaryTitleCell = summaryTitle.createCell(0);
+                summaryTitleCell.setCellValue("Resumen general del sistema");
+                summaryTitleCell.setCellStyle(titleStyle);
+
+                Row summary = sheet.createRow(rowNum++);
+                Cell label = summary.createCell(0);
+                label.setCellValue("Total de registros de sonidos cardíacos");
+                label.setCellStyle(headerStyle);
+                Cell value = summary.createCell(1);
+                value.setCellValue(totalRegistros);
+                value.setCellStyle(boldStyle);
+
             rowNum++;
-            rowNum = writeSection(sheet, rowNum, "Valvulopatías por género",
-                    "Género", genderMap, headerStyle, titleStyle, boldStyle);
+                rowNum = writeSection(sheet, rowNum, "Proporción de sonidos normales y anormales",
+                    "Tipo de sonido", normalStatusMap, headerStyle, titleStyle, boldStyle);
             rowNum++;
-            writeSection(sheet, rowNum, "Valvulopatías y enfermedades de base",
-                    "Condición", diseaseMap, headerStyle, titleStyle, boldStyle);
+                rowNum = writeSection(sheet, rowNum, "Registros por tipo de anomalía cardíaca",
+                    "Tipo de anomalía", categoriaMap, headerStyle, titleStyle, boldStyle);
+                rowNum++;
+                rowNum = writeSection(sheet, rowNum, "Registros por foco de auscultación",
+                    "Foco", focoMap, headerStyle, titleStyle, boldStyle);
+                rowNum++;
+                rowNum = writeSection(sheet, rowNum, "Registros por institución/hospital",
+                    "Institución", institucionMap, headerStyle, titleStyle, boldStyle);
+                rowNum++;
+                rowNum = writeSection(sheet, rowNum, "Evolución mensual de registros",
+                    "Periodo", timelineMap, headerStyle, titleStyle, boldStyle);
+                rowNum++;
+                rowNum = writeSection(sheet, rowNum, "Valvulopatías por rango de edad",
+                    "Rango de edad", valvulopathyAgeMap, headerStyle, titleStyle, boldStyle);
+                rowNum++;
+                rowNum = writeSection(sheet, rowNum, "Valvulopatías por género",
+                    "Género", valvulopathyGenderMap, headerStyle, titleStyle, boldStyle);
+                rowNum++;
+                writeSection(sheet, rowNum, "Valvulopatías y enfermedades de base",
+                    "Condición", valvulopathyDiseaseMap, headerStyle, titleStyle, boldStyle);
 
             wb.write(out);
             return out.toByteArray();
