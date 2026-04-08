@@ -2,6 +2,8 @@ package com.tuapp.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "diagnostics")
@@ -20,11 +22,36 @@ public class DiagnosticEntity {
     @Column(nullable = false)
     private Integer age;
 
+    @Column(nullable = false, length = 150)
+    private String institucion;
+
+    @Column(nullable = false)
+    private Double altura;
+
+    @Column(nullable = false)
+    private Double peso;
+
     @Column(nullable = false, length = 20)
     private String gender;
 
-    @Column(name = "underlying_diseases", length = 255)
-    private String underlyingDiseases;
+        @Column(name = "diagnostico_texto", nullable = false, columnDefinition = "TEXT")
+        private String diagnosticoTexto;
+
+        @ManyToOne(fetch = FetchType.LAZY, optional = false)
+        @JoinColumn(name = "foco_id", nullable = false)
+        private FocoEntity foco;
+
+        @ManyToOne(fetch = FetchType.LAZY, optional = false)
+        @JoinColumn(name = "categoria_anomalia_id", nullable = false)
+        private CategoriaAnomaliaEntity categoriaAnomalia;
+
+        @ManyToMany
+        @JoinTable(
+            name = "diagnostics_enfermedades_base",
+            joinColumns = @JoinColumn(name = "diagnostic_id"),
+            inverseJoinColumns = @JoinColumn(name = "enfermedad_base_id")
+        )
+        private Set<EnfermedadBaseEntity> enfermedadesBase = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
@@ -45,9 +72,27 @@ public class DiagnosticEntity {
     public Integer getAge() { return age; }
     public void setAge(Integer age) { this.age = age; }
 
+    public String getInstitucion() { return institucion; }
+    public void setInstitucion(String institucion) { this.institucion = institucion; }
+
+    public Double getAltura() { return altura; }
+    public void setAltura(Double altura) { this.altura = altura; }
+
+    public Double getPeso() { return peso; }
+    public void setPeso(Double peso) { this.peso = peso; }
+
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
 
-    public String getUnderlyingDiseases() { return underlyingDiseases; }
-    public void setUnderlyingDiseases(String underlyingDiseases) { this.underlyingDiseases = underlyingDiseases; }
+    public String getDiagnosticoTexto() { return diagnosticoTexto; }
+    public void setDiagnosticoTexto(String diagnosticoTexto) { this.diagnosticoTexto = diagnosticoTexto; }
+
+    public FocoEntity getFoco() { return foco; }
+    public void setFoco(FocoEntity foco) { this.foco = foco; }
+
+    public CategoriaAnomaliaEntity getCategoriaAnomalia() { return categoriaAnomalia; }
+    public void setCategoriaAnomalia(CategoriaAnomaliaEntity categoriaAnomalia) { this.categoriaAnomalia = categoriaAnomalia; }
+
+    public Set<EnfermedadBaseEntity> getEnfermedadesBase() { return enfermedadesBase; }
+    public void setEnfermedadesBase(Set<EnfermedadBaseEntity> enfermedadesBase) { this.enfermedadesBase = enfermedadesBase; }
 }

@@ -63,7 +63,7 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
     @Query("""
         SELECT
             CASE
-                WHEN d.underlyingDiseases IS NULL OR TRIM(d.underlyingDiseases) = '' THEN 'SIN ENFERMEDAD DE BASE'
+                WHEN d.enfermedadesBase IS EMPTY THEN 'SIN ENFERMEDAD DE BASE'
                 ELSE 'CON ENFERMEDAD DE BASE'
             END,
             COUNT(d)
@@ -71,7 +71,7 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
         WHERE d.isNormal = false
         GROUP BY
             CASE
-                WHEN d.underlyingDiseases IS NULL OR TRIM(d.underlyingDiseases) = '' THEN 'SIN ENFERMEDAD DE BASE'
+                WHEN d.enfermedadesBase IS EMPTY THEN 'SIN ENFERMEDAD DE BASE'
                 ELSE 'CON ENFERMEDAD DE BASE'
             END
     """)
