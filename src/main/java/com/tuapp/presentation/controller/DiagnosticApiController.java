@@ -68,8 +68,9 @@ public class DiagnosticApiController {
     }
 
     @GetMapping("/by-creator")
-    public ResponseEntity<Map<String, Object>> getByCreator() {
-        List<DiagnosticEntity> diagnostics = getDiagnosticsByCreatorUseCase.execute();
+    public ResponseEntity<Map<String, Object>> getByCreator(
+            @RequestParam(name = "usuarioCreaId", required = false) Long usuarioCreaId) {
+        List<DiagnosticEntity> diagnostics = getDiagnosticsByCreatorUseCase.execute(usuarioCreaId);
 
         Map<String, List<DiagnosticEntity>> grouped = diagnostics.stream()
                 .collect(Collectors.groupingBy(this::creatorGroupKey, LinkedHashMap::new, Collectors.toList()));
@@ -87,6 +88,7 @@ public class DiagnosticApiController {
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("message", "Diagnósticos agrupados por usuario creador");
+        response.put("filtroUsuarioCreaId", usuarioCreaId);
         response.put("data", result);
 
         return ResponseEntity.ok(response);

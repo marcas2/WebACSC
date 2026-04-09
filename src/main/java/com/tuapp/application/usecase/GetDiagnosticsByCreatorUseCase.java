@@ -15,7 +15,10 @@ public class GetDiagnosticsByCreatorUseCase {
         this.diagnosticRepository = diagnosticRepository;
     }
 
-    public List<DiagnosticEntity> execute() {
-        return diagnosticRepository.findAllWithCreatorOrderByCreatedAtDesc();
+    public List<DiagnosticEntity> execute(Long creatorId) {
+        if (creatorId == null) {
+            return diagnosticRepository.findAllWithCreatorOrderByCreatedAtDesc();
+        }
+        return diagnosticRepository.findAllByCreatorIdWithCreatorOrderByCreatedAtDesc(creatorId);
     }
 }

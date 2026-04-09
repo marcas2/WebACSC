@@ -32,4 +32,9 @@ public class DiagnosticRepositoryAdapter implements DiagnosticRepository {
         return diagnosticJpaRepository.findAllWithUsuarioCrea();
 
     }
+
+    @Override
+    public List<DiagnosticEntity> findAllByCreatorIdWithCreatorOrderByCreatedAtDesc(Long creatorId) {
+        return diagnosticJpaRepository.findAllByUsuarioCreaIdWithUsuarioCrea(creatorId);
+    }
 }

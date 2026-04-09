@@ -9,4 +9,5 @@ public interface DiagnosticRepository {
     DiagnosticEntity save(DiagnosticEntity diagnostic);
     Optional<DiagnosticEntity> findById(Long diagnosticId);
     List<DiagnosticEntity> findAllWithCreatorOrderByCreatedAtDesc();
+    List<DiagnosticEntity> findAllByCreatorIdWithCreatorOrderByCreatedAtDesc(Long creatorId);
 }

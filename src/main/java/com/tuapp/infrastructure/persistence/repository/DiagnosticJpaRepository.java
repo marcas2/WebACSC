@@ -17,6 +17,15 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
     List<DiagnosticEntity> findAllWithUsuarioCrea();
 
     @Query("""
+        SELECT d
+        FROM DiagnosticEntity d
+        LEFT JOIN FETCH d.usuarioCrea uc
+        WHERE uc.id = :creatorId
+        ORDER BY d.creadoEn DESC, d.id DESC
+    """)
+    List<DiagnosticEntity> findAllByUsuarioCreaIdWithUsuarioCrea(Long creatorId);
+
+    @Query("""
         SELECT
             CASE
                 WHEN d.edad BETWEEN 0 AND 17 THEN '0-17'
