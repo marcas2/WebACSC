@@ -1,5 +1,6 @@
 package com.tuapp.presentation.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.DecimalMax;
@@ -17,17 +18,20 @@ public class CreateDiagnosticRequest {
     @Size(max = 150, message = "institucion no puede superar 150 caracteres")
     private String institucion;
 
-    @NotNull(message = "isNormal es obligatorio")
-    private Boolean isNormal;
+    @NotNull(message = "esNormal es obligatorio")
+    @JsonAlias("isNormal")
+    private Boolean esNormal;
 
-    @NotNull(message = "age es obligatorio")
+    @NotNull(message = "edad es obligatorio")
     @Min(value = 0, message = "La edad no puede ser menor que 0")
     @Max(value = 120, message = "La edad no puede ser mayor que 120")
-    private Integer age;
+    @JsonAlias("age")
+    private Integer edad;
 
-    @NotBlank(message = "gender es obligatorio")
-    @Size(max = 20, message = "gender no puede superar 20 caracteres")
-    private String gender;
+    @NotBlank(message = "genero es obligatorio")
+    @Size(max = 20, message = "genero no puede superar 20 caracteres")
+    @JsonAlias("gender")
+    private String genero;
 
     @NotNull(message = "altura es obligatorio")
     @DecimalMin(value = "0.1", message = "altura debe ser mayor que 0")
@@ -49,6 +53,14 @@ public class CreateDiagnosticRequest {
     @NotNull(message = "categoriaAnomaliaId es obligatorio")
     private Long categoriaAnomaliaId;
 
+    @NotNull(message = "usuarioCreaId es obligatorio")
+    @JsonAlias("usuarioCrea")
+    private Long usuarioCreaId;
+
+    private Boolean verificado;
+
+    private Boolean valvulopatia;
+
     private List<Long> enfermedadesBaseIds = new ArrayList<>();
 
     public String getInstitucion() {
@@ -59,28 +71,28 @@ public class CreateDiagnosticRequest {
         this.institucion = institucion;
     }
 
-    public Boolean getIsNormal() {
-        return isNormal;
+    public Boolean getEsNormal() {
+        return esNormal;
     }
 
-    public void setIsNormal(Boolean isNormal) {
-        this.isNormal = isNormal;
+    public void setEsNormal(Boolean esNormal) {
+        this.esNormal = esNormal;
     }
 
-    public Integer getAge() {
-        return age;
+    public Integer getEdad() {
+        return edad;
     }
 
-    public void setAge(Integer age) {
-        this.age = age;
+    public void setEdad(Integer edad) {
+        this.edad = edad;
     }
 
-    public String getGender() {
-        return gender;
+    public String getGenero() {
+        return genero;
     }
 
-    public void setGender(String gender) {
-        this.gender = gender;
+    public void setGenero(String genero) {
+        this.genero = genero;
     }
 
     public Double getAltura() {
@@ -121,6 +133,30 @@ public class CreateDiagnosticRequest {
 
     public void setCategoriaAnomaliaId(Long categoriaAnomaliaId) {
         this.categoriaAnomaliaId = categoriaAnomaliaId;
+    }
+
+    public Long getUsuarioCreaId() {
+        return usuarioCreaId;
+    }
+
+    public void setUsuarioCreaId(Long usuarioCreaId) {
+        this.usuarioCreaId = usuarioCreaId;
+    }
+
+    public Boolean getVerificado() {
+        return verificado;
+    }
+
+    public void setVerificado(Boolean verificado) {
+        this.verificado = verificado;
+    }
+
+    public Boolean getValvulopatia() {
+        return valvulopatia;
+    }
+
+    public void setValvulopatia(Boolean valvulopatia) {
+        this.valvulopatia = valvulopatia;
     }
 
     public List<Long> getEnfermedadesBaseIds() {

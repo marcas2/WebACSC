@@ -26,18 +26,20 @@ public class LoginUseCase {
     public AuthResponse execute(LoginRequest request) {
         User user = authDomainService.findByUsername(request.getUsername());
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getHashContrasena())) {
             throw new RuntimeException("Credenciales inválidas");
         }
 
         String token = jwtTokenProvider.generateToken(
-                user.getUsername(),
+                user.getNombreUsuario(),
                 user.getRoleName()
         );
 
         return new AuthResponse(
                 token,
-                user.getUsername(),
+            user.getId(),
+                user.getNombreUsuario(),
+            user.getEmail(),
                 user.getRoleName()
         );
     }

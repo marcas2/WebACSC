@@ -52,6 +52,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Flyway Migrations -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
         <!-- JWT (jjwt 0.12.x) -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

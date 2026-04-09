@@ -9,21 +9,29 @@ import java.util.List;
 public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity, Long> {
 
     @Query("""
+        SELECT d
+        FROM DiagnosticEntity d
+        LEFT JOIN FETCH d.usuarioCrea uc
+        ORDER BY d.creadoEn DESC, d.id DESC
+    """)
+    List<DiagnosticEntity> findAllWithUsuarioCrea();
+
+    @Query("""
         SELECT
             CASE
-                WHEN d.age BETWEEN 0 AND 17 THEN '0-17'
-                WHEN d.age BETWEEN 18 AND 35 THEN '18-35'
-                WHEN d.age BETWEEN 36 AND 59 THEN '36-59'
+                WHEN d.edad BETWEEN 0 AND 17 THEN '0-17'
+                WHEN d.edad BETWEEN 18 AND 35 THEN '18-35'
+                WHEN d.edad BETWEEN 36 AND 59 THEN '36-59'
                 ELSE '60+'
             END,
             COUNT(d)
         FROM DiagnosticEntity d
-        WHERE d.isNormal = false
+        WHERE d.esNormal = false
         GROUP BY
             CASE
-                WHEN d.age BETWEEN 0 AND 17 THEN '0-17'
-                WHEN d.age BETWEEN 18 AND 35 THEN '18-35'
-                WHEN d.age BETWEEN 36 AND 59 THEN '36-59'
+                WHEN d.edad BETWEEN 0 AND 17 THEN '0-17'
+                WHEN d.edad BETWEEN 18 AND 35 THEN '18-35'
+                WHEN d.edad BETWEEN 36 AND 59 THEN '36-59'
                 ELSE '60+'
             END
         ORDER BY 1
@@ -31,11 +39,11 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
     List<Object[]> countValvulopathiesByAgeRange();
 
     @Query("""
-        SELECT d.gender, COUNT(d)
+        SELECT d.genero, COUNT(d)
         FROM DiagnosticEntity d
-        WHERE d.isNormal = false
-        GROUP BY d.gender
-        ORDER BY d.gender
+        WHERE d.esNormal = false
+        GROUP BY d.genero
+        ORDER BY d.genero
     """)
     List<Object[]> countValvulopathiesByGender();
 
@@ -48,7 +56,7 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
             COUNT(DISTINCT d.id)
         FROM DiagnosticEntity d
         LEFT JOIN d.enfermedadesBase eb
-        WHERE d.isNormal = false
+        WHERE d.esNormal = false
         GROUP BY
             CASE
                 WHEN eb.id IS NULL THEN 'SIN ENFERMEDAD DE BASE'
@@ -61,14 +69,14 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
     @Query("""
         SELECT
             CASE
-                WHEN d.isNormal = true THEN 'NORMAL'
+                WHEN d.esNormal = true THEN 'NORMAL'
                 ELSE 'ANORMAL'
             END,
             COUNT(d)
         FROM DiagnosticEntity d
         GROUP BY
             CASE
-                WHEN d.isNormal = true THEN 'NORMAL'
+                WHEN d.esNormal = true THEN 'NORMAL'
                 ELSE 'ANORMAL'
             END
         ORDER BY 1

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion de instituciones</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f3f4f8; color: #1a1a2e; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .actions { display: flex; gap: 10px; }
+        .btn { text-decoration: none; background: #3266ad; color: #fff; padding: 10px 16px; border-radius: 6px; font-size: 14px; border: none; cursor: pointer; }
+        .btn-danger { background: #b53a3a; }
+        .btn-secondary { background: #777; }
+        .message { margin-bottom: 1rem; padding: 12px 14px; border-radius: 8px; font-size: 14px; }
+        .success { background: #edf8f1; border: 1px solid #b8e0c2; color: #2d7a55; }
+        .error { background: #fff4f0; border: 1px solid #f5c4b3; color: #993c1d; }
+        .card { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+        th, td { padding: 12px; border-bottom: 1px solid #eaeef5; text-align: left; vertical-align: top; }
+        th { background: #3266ad; color: #fff; }
+        form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        input, select { padding: 8px 10px; border: 1px solid #d7dce5; border-radius: 6px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="topbar">
+        <h1>Gestion de instituciones</h1>
+        <div class="actions">
+            <a class="btn btn-secondary" th:href="@{/dashboard/users}">Gestion de usuarios</a>
+            <a class="btn btn-secondary" th:href="@{/dashboard}">Volver al dashboard</a>
+        </div>
+    </div>
+
+    <div th:if="${success}" class="message success" th:text="${success}"></div>
+    <div th:if="${error}" class="message error" th:text="${error}"></div>
+
+    <div class="card">
+        <h2 style="margin-top:0;">Crear institucion</h2>
+        <form th:action="@{/dashboard/instituciones/create}" method="post">
+            <input type="text" name="nombre" placeholder="Nombre de la institucion" required>
+            <button type="submit" class="btn">Crear institucion</button>
+        </form>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Estado</th>
+            <th>Editar</th>
+            <th>Consultorios</th>
+            <th>Eliminar</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="institucion : ${instituciones}">
+            <td th:text="${institucion.id}">1</td>
+            <td th:text="${institucion.nombre}">Hospital Central</td>
+            <td th:text="${institucion.activo} ? 'Activo' : 'Inactivo'">Activo</td>
+
+            <td>
+                <form th:action="@{/dashboard/instituciones/{id}/edit(id=${institucion.id})}" method="post">
+                    <input type="text" name="nombre" th:value="${institucion.nombre}" required>
+                    <select name="activo" required>
+                        <option value="true" th:selected="${institucion.activo}">Activo</option>
+                        <option value="false" th:selected="${!institucion.activo}">Inactivo</option>
+                    </select>
+                    <button type="submit" class="btn">Guardar</button>
+                </form>
+            </td>
+
+            <td>
+                <a class="btn" th:href="@{/dashboard/instituciones/{id}/consultorios(id=${institucion.id})}">
+                    Gestionar consultorios
+                </a>
+            </td>
+
+            <td>
+                <form th:action="@{/dashboard/instituciones/{id}/delete(id=${institucion.id})}" method="post"
+                      onsubmit="return confirm('Seguro que deseas eliminar esta institucion?');">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

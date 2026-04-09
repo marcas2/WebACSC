@@ -8,6 +8,8 @@ import com.tuapp.infrastructure.persistence.entity.CategoriaAnomaliaEntity;
 import com.tuapp.infrastructure.persistence.entity.DiagnosticEntity;
 import com.tuapp.infrastructure.persistence.entity.EnfermedadBaseEntity;
 import com.tuapp.infrastructure.persistence.entity.FocoEntity;
+import com.tuapp.infrastructure.persistence.entity.UserEntity;
+import com.tuapp.infrastructure.persistence.repository.UserJpaRepository;
 import com.tuapp.presentation.dto.CreateDiagnosticRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +25,18 @@ public class CreateDiagnosticUseCase {
     private final FocoRepository focoRepository;
     private final CategoriaAnomaliaRepository categoriaAnomaliaRepository;
     private final EnfermedadBaseRepository enfermedadBaseRepository;
+    private final UserJpaRepository userJpaRepository;
 
     public CreateDiagnosticUseCase(DiagnosticRepository diagnosticRepository,
                                    FocoRepository focoRepository,
                                    CategoriaAnomaliaRepository categoriaAnomaliaRepository,
-                                   EnfermedadBaseRepository enfermedadBaseRepository) {
+                                   EnfermedadBaseRepository enfermedadBaseRepository,
+                                   UserJpaRepository userJpaRepository) {
         this.diagnosticRepository = diagnosticRepository;
         this.focoRepository = focoRepository;
         this.categoriaAnomaliaRepository = categoriaAnomaliaRepository;
         this.enfermedadBaseRepository = enfermedadBaseRepository;
+        this.userJpaRepository = userJpaRepository;
     }
 
     @Transactional
@@ -45,6 +50,8 @@ public class CreateDiagnosticUseCase {
 
         Set<Long> enfermedadesIds = normalizeEnfermedadesIds(request.getEnfermedadesBaseIds());
         List<EnfermedadBaseEntity> enfermedades = enfermedadBaseRepository.findAllById(enfermedadesIds);
+        UserEntity usuarioCrea = userJpaRepository.findById(request.getUsuarioCreaId())
+                .orElseThrow(() -> new IllegalArgumentException("usuarioCreaId no existe"));
 
         if (enfermedades.size() != enfermedadesIds.size()) {
             throw new IllegalArgumentException("Uno o más enfermedadesBaseIds no existen");
@@ -52,14 +59,17 @@ public class CreateDiagnosticUseCase {
 
         DiagnosticEntity entity = new DiagnosticEntity();
         entity.setInstitucion(normalizeText(request.getInstitucion()));
-        entity.setIsNormal(request.getIsNormal());
-        entity.setAge(request.getAge());
-        entity.setGender(normalizeGender(request.getGender()));
+        entity.setEsNormal(request.getEsNormal());
+        entity.setEdad(request.getEdad());
+        entity.setGenero(normalizeGender(request.getGenero()));
         entity.setAltura(request.getAltura());
         entity.setPeso(request.getPeso());
         entity.setDiagnosticoTexto(normalizeText(request.getDiagnosticoTexto()));
+        entity.setVerificado(defaultBoolean(request.getVerificado()));
+        entity.setValvulopatia(defaultBoolean(request.getValvulopatia()));
         entity.setFoco(foco);
         entity.setCategoriaAnomalia(categoriaAnomalia);
+        entity.setUsuarioCrea(usuarioCrea);
         entity.setEnfermedadesBase(new LinkedHashSet<>(enfermedades));
 
         return diagnosticRepository.save(entity);
@@ -81,5 +91,9 @@ public class CreateDiagnosticUseCase {
             return Set.of();
         }
         return new LinkedHashSet<>(ids);
+    }
+
+    private boolean defaultBoolean(Boolean value) {
+        return value != null && value;
     }
 }

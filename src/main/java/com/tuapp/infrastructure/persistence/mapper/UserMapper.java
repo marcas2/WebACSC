@@ -18,25 +18,25 @@ public class UserMapper {
     public User toDomain(UserEntity entity) {
         return new User(
                 entity.getId(),
-                entity.getUsername(),
+                entity.getNombreUsuario(),
                 entity.getEmail(),
-                entity.getPasswordHash(),
-                entity.getRole().getId(),
-                entity.getRole().getName(),
-                entity.getCreatedAt()
+                entity.getHashContrasena(),
+                entity.getRol().getId(),
+                entity.getRol().getNombre(),
+                entity.getCreadoEn()
         );
     }
 
     public UserEntity toEntity(User domain) {
         UserEntity entity = new UserEntity();
         entity.setId(domain.getId());
-        entity.setUsername(domain.getUsername());
+        entity.setNombreUsuario(domain.getNombreUsuario());
         entity.setEmail(domain.getEmail());
-        entity.setPasswordHash(domain.getPasswordHash());
-        entity.setCreatedAt(domain.getCreatedAt());
+        entity.setHashContrasena(domain.getHashContrasena());
+        entity.setCreadoEn(domain.getCreadoEn());
 
         RoleEntity role = resolveRole(domain);
-        entity.setRole(role);
+        entity.setRol(role);
 
         return entity;
     }
@@ -48,7 +48,7 @@ public class UserMapper {
         }
 
         if (domain.getRoleName() != null && !domain.getRoleName().trim().isEmpty()) {
-            return roleRepository.findByName(domain.getRoleName().trim().toUpperCase())
+            return roleRepository.findByNombre(domain.getRoleName().trim().toUpperCase())
                     .orElseThrow(() -> new RuntimeException("Rol no encontrado con nombre: " + domain.getRoleName()));
         }
 

@@ -31,7 +31,7 @@ public class AuthDomainService {
             throw new IllegalArgumentException("El usuario no puede ser nulo.");
         }
 
-        if (usernameExists(user.getUsername())) {
+        if (usernameExists(user.getNombreUsuario())) {
             throw new IllegalArgumentException("El nombre de usuario ya existe.");
         }
 

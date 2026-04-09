@@ -43,10 +43,10 @@ public class UpdateUserUseCase {
                 current.getId(),
                 username,
                 email,
-                current.getPasswordHash(),
+                current.getHashContrasena(),
                 roleId,
                 roleName,
-                current.getCreatedAt()
+                current.getCreadoEn()
         );
 
         userRepository.save(updated);

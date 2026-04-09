@@ -45,6 +45,11 @@ public class SecurityConfig {
                     "/error"
                 ).permitAll()
                 .requestMatchers("/dashboard/users/**").hasAnyRole("SUPER_USER", "ADMIN")
+                .requestMatchers("/dashboard/instituciones/**").hasAnyRole("SUPER_USER", "ADMIN")
+                .requestMatchers("/dashboard/focos/**").hasAnyRole("SUPER_USER", "ADMIN")
+                .requestMatchers("/dashboard/categorias-anomalias/**").hasAnyRole("SUPER_USER", "ADMIN")
+                .requestMatchers("/dashboard/anomalias/**").hasAnyRole("SUPER_USER", "ADMIN")
+                .requestMatchers("/dashboard/enfermedades/**").hasAnyRole("SUPER_USER", "ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

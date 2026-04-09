@@ -172,22 +172,22 @@ public class DashboardController {
     }
 
     private void populateEmptyDashboardModel(Model model) {
-        model.addAttribute("normalStatusLabels", new ArrayList<>());
-        model.addAttribute("normalStatusData", new ArrayList<>());
-        model.addAttribute("anomaliaLabels", new ArrayList<>());
-        model.addAttribute("anomaliaData", new ArrayList<>());
-        model.addAttribute("focoLabels", new ArrayList<>());
-        model.addAttribute("focoData", new ArrayList<>());
-        model.addAttribute("institucionLabels", new ArrayList<>());
-        model.addAttribute("institucionData", new ArrayList<>());
-        model.addAttribute("timelineLabels", new ArrayList<>());
-        model.addAttribute("timelineData", new ArrayList<>());
-        model.addAttribute("valvAgeLabels", new ArrayList<>());
-        model.addAttribute("valvAgeData", new ArrayList<>());
-        model.addAttribute("valvGenderLabels", new ArrayList<>());
-        model.addAttribute("valvGenderData", new ArrayList<>());
-        model.addAttribute("valvDiseaseLabels", new ArrayList<>());
-        model.addAttribute("valvDiseaseData", new ArrayList<>());
+        model.addAttribute("normalStatusLabels", new ArrayList<>(java.util.List.of("NORMAL", "ANORMAL")));
+        model.addAttribute("normalStatusData", new ArrayList<>(java.util.List.of(0L, 0L)));
+        model.addAttribute("anomaliaLabels", new ArrayList<>(java.util.List.of("Sin datos")));
+        model.addAttribute("anomaliaData", new ArrayList<>(java.util.List.of(0L)));
+        model.addAttribute("focoLabels", new ArrayList<>(java.util.List.of("Sin datos")));
+        model.addAttribute("focoData", new ArrayList<>(java.util.List.of(0L)));
+        model.addAttribute("institucionLabels", new ArrayList<>(java.util.List.of("Sin datos")));
+        model.addAttribute("institucionData", new ArrayList<>(java.util.List.of(0L)));
+        model.addAttribute("timelineLabels", new ArrayList<>(java.util.List.of("Sin datos")));
+        model.addAttribute("timelineData", new ArrayList<>(java.util.List.of(0L)));
+        model.addAttribute("valvAgeLabels", new ArrayList<>(java.util.List.of("0-17", "18-35", "36-59", "60+")));
+        model.addAttribute("valvAgeData", new ArrayList<>(java.util.List.of(0L, 0L, 0L, 0L)));
+        model.addAttribute("valvGenderLabels", new ArrayList<>(java.util.List.of("M", "F")));
+        model.addAttribute("valvGenderData", new ArrayList<>(java.util.List.of(0L, 0L)));
+        model.addAttribute("valvDiseaseLabels", new ArrayList<>(java.util.List.of("CON ENFERMEDAD DE BASE", "SIN ENFERMEDAD DE BASE")));
+        model.addAttribute("valvDiseaseData", new ArrayList<>(java.util.List.of(0L, 0L)));
 
         model.addAttribute("totalRegistros", 0);
         model.addAttribute("normalPct", 0);

@@ -16,6 +16,6 @@ public class RoleRepositoryImpl implements RoleRepository {
 
     @Override
     public Optional<Long> findIdByName(String name) {
-        return roleJpaRepository.findByName(name).map(role -> role.getId());
+        return roleJpaRepository.findByNombre(name).map(role -> role.getId());
     }
 }

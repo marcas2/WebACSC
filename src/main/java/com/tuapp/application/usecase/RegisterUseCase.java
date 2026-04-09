@@ -44,7 +44,7 @@ public class RegisterUseCase {
             throw new IllegalArgumentException("La contraseña es requerida.");
         }
 
-        RoleEntity defaultRole = roleRepository.findByName(DEFAULT_ROLE_NAME)
+        RoleEntity defaultRole = roleRepository.findByNombre(DEFAULT_ROLE_NAME)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No se encontró el rol por defecto para el registro."
                 ));
@@ -57,7 +57,7 @@ public class RegisterUseCase {
                 email,
                 hashedPassword,
                 defaultRole.getId(),      // debería ser 3
-                defaultRole.getName(),    // USER
+                defaultRole.getNombre(),    // USER
                 LocalDateTime.now()
         );
 

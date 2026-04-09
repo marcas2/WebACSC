@@ -5,37 +5,37 @@ import java.time.LocalDateTime;
 public class User {
 
     private Long id;
-    private String username;
+    private String nombreUsuario;
     private String email;
-    private String passwordHash;
+    private String hashContrasena;
     private Long roleId;
     private String roleName;
-    private LocalDateTime createdAt;
+    private LocalDateTime creadoEn;
 
-    public User(Long id, String username, String email, String passwordHash,
-                Long roleId, String roleName, LocalDateTime createdAt) {
+    public User(Long id, String nombreUsuario, String email, String hashContrasena,
+                Long roleId, String roleName, LocalDateTime creadoEn) {
         this.id = id;
-        this.username = username;
+        this.nombreUsuario = nombreUsuario;
         this.email = email;
-        this.passwordHash = passwordHash;
+        this.hashContrasena = hashContrasena;
         this.roleId = roleId;
         this.roleName = roleName;
-        this.createdAt = createdAt;
+        this.creadoEn = creadoEn;
     }
 
     public Long getId() { return id; }
-    public String getUsername() { return username; }
+    public String getNombreUsuario() { return nombreUsuario; }
     public String getEmail() { return email; }
-    public String getPasswordHash() { return passwordHash; }
+    public String getHashContrasena() { return hashContrasena; }
     public Long getRoleId() { return roleId; }
     public String getRoleName() { return roleName; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getCreadoEn() { return creadoEn; }
 
     public void setId(Long id) { this.id = id; }
-    public void setUsername(String username) { this.username = username; }
+    public void setNombreUsuario(String nombreUsuario) { this.nombreUsuario = nombreUsuario; }
     public void setEmail(String email) { this.email = email; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public void setHashContrasena(String hashContrasena) { this.hashContrasena = hashContrasena; }
     public void setRoleId(Long roleId) { this.roleId = roleId; }
     public void setRoleName(String roleName) { this.roleName = roleName; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setCreadoEn(LocalDateTime creadoEn) { this.creadoEn = creadoEn; }
 }

@@ -141,10 +141,26 @@
             &nbsp;·&nbsp; Rol: <strong th:text="${role}"></strong>
         </p>
     </div>
-    <div sec:authorize="hasAnyAuthority('ROLE_SUPER_USER','ROLE_ADMIN')" style="padding: 0 2rem 1rem;">
+    <div sec:authorize="hasAnyAuthority('ROLE_SUPER_USER','ROLE_ADMIN')" style="padding: 0 2rem 1rem; display:flex; gap:10px;">
         <a th:href="@{/dashboard/users}"
         style="padding: 8px 16px; border-radius: 6px; background: #1a1a2e; color: #fff; text-decoration: none;">
             Gestión de usuarios
+        </a>
+        <a th:href="@{/dashboard/instituciones}"
+        style="padding: 8px 16px; border-radius: 6px; background: #3266ad; color: #fff; text-decoration: none;">
+            Gestión de instituciones
+        </a>
+        <a th:href="@{/dashboard/focos}"
+        style="padding: 8px 16px; border-radius: 6px; background: #2d7a55; color: #fff; text-decoration: none;">
+            Gestión de focos
+        </a>
+        <a th:href="@{/dashboard/categorias-anomalias}"
+        style="padding: 8px 16px; border-radius: 6px; background: #7b4fa3; color: #fff; text-decoration: none;">
+            Gestión de categorías/anomalías
+        </a>
+        <a th:href="@{/dashboard/enfermedades}"
+        style="padding: 8px 16px; border-radius: 6px; background: #b8742a; color: #fff; text-decoration: none;">
+            Gestión de enfermedades
         </a>
     </div>
     <a th:href="@{/auth/logout}" class="logout-btn">Cerrar sesión</a>

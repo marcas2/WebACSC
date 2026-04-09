@@ -63,13 +63,13 @@
         <tbody>
         <tr th:each="user : ${users}">
             <td th:text="${user.id}">1</td>
-            <td th:text="${user.username}">usuario</td>
+            <td th:text="${user.nombreUsuario}">usuario</td>
             <td th:text="${user.email}">correo@correo.com</td>
             <td th:text="${user.roleName}">USER</td>
 
             <td>
                 <form th:action="@{/dashboard/users/{id}/edit(id=${user.id})}" method="post">
-                    <input type="text" name="username" th:value="${user.username}" required>
+                    <input type="text" name="username" th:value="${user.nombreUsuario}" required>
                     <input type="email" name="email" th:value="${user.email}" required>
                     <select name="roleName" required>
                         <option value="USER" th:selected="${user.roleName == 'USER'}">USER</option>

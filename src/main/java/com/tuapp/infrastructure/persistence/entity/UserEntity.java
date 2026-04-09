@@ -11,42 +11,42 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 50)
-    private String username;
+    @Column(name = "nombreusuario", unique = true, nullable = false, length = 50)
+    private String nombreUsuario;
 
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
     @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    private String hashContrasena;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
-    private RoleEntity role;
+    private RoleEntity rol;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDateTime creadoEn;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        creadoEn = LocalDateTime.now();
     }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getNombreUsuario() { return nombreUsuario; }
+    public void setNombreUsuario(String nombreUsuario) { this.nombreUsuario = nombreUsuario; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public String getHashContrasena() { return hashContrasena; }
+    public void setHashContrasena(String hashContrasena) { this.hashContrasena = hashContrasena; }
 
-    public RoleEntity getRole() { return role; }
-    public void setRole(RoleEntity role) { this.role = role; }
+    public RoleEntity getRol() { return rol; }
+    public void setRol(RoleEntity rol) { this.rol = rol; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreadoEn() { return creadoEn; }
+    public void setCreadoEn(LocalDateTime creadoEn) { this.creadoEn = creadoEn; }
 }

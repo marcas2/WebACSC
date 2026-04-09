@@ -28,7 +28,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByUsername(String username) {
-        return jpaRepository.findByUsername(username).map(mapper::toDomain);
+        return jpaRepository.findByNombreUsuario(username).map(mapper::toDomain);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public boolean existsByUsername(String username) {
-        return jpaRepository.existsByUsername(username);
+        return jpaRepository.existsByNombreUsuario(username);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public boolean existsByUsernameAndIdNot(String username, Long id) {
-        return jpaRepository.existsByUsernameAndIdNot(username, id);
+        return jpaRepository.existsByNombreUsuarioAndIdNot(username, id);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class UserRepositoryImpl implements UserRepository {
         UserEntity entity = jpaRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        entity.setPasswordHash(passwordHash);
+        entity.setHashContrasena(passwordHash);
         jpaRepository.save(entity);
     }
 }
