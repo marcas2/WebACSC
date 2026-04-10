@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
@@ -15,7 +17,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,7 +69,7 @@ class DashboardControllerTest {
     }
 
     @Test
-    void hu007_shouldShowUnderlyingDiseasesCorrectly() {
+    void hu006_shouldShowUnderlyingDiseasesCorrectly() {
         mockCompleteDashboardData();
         Model model = new ExtendedModelMap();
 
@@ -158,6 +162,94 @@ class DashboardControllerTest {
         assertEquals(List.of(0L), model.getAttribute("focoData"));
         assertEquals(List.of(0L), model.getAttribute("institucionData"));
         assertEquals(List.of(0L), model.getAttribute("timelineData"));
+    }
+
+    @Test
+    void hu007_shouldExportDashboardDataAsExcel() {
+        mockExportDashboardData();
+
+        ResponseEntity<byte[]> response = controller.export("excel", null);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                response.getHeaders().getContentType().toString()
+        );
+        assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("reporte_sonidos_cardiacos.xlsx"));
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().length > 0);
+    }
+
+    @Test
+    void hu007_shouldExportDashboardDataAsPdf() {
+        mockExportDashboardData();
+
+        ResponseEntity<byte[]> response = controller.export("pdf", null);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(MediaType.APPLICATION_PDF, response.getHeaders().getContentType());
+        assertTrue(response.getHeaders().getFirst("Content-Disposition").contains("reporte_sonidos_cardiacos.pdf"));
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().length > 0);
+    }
+
+    @Test
+    void hu007_shouldShowErrorWhenExportFails() {
+        when(dashboardDiagnosticService.getByNormalStatus()).thenThrow(new RuntimeException("boom"));
+
+        ResponseEntity<byte[]> response = controller.export("excel", null);
+
+        assertEquals(500, response.getStatusCode().value());
+        assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
+        assertNotNull(response.getBody());
+        assertEquals("No se pudo generar el archivo de exportación.", new String(response.getBody()));
+    }
+
+    private void mockExportDashboardData() {
+        Map<String, Long> normalStatus = new LinkedHashMap<>();
+        normalStatus.put("NORMAL", 3L);
+        normalStatus.put("ANORMAL", 2L);
+
+        Map<String, Long> categoria = new LinkedHashMap<>();
+        categoria.put("Estenosis", 2L);
+        categoria.put("Insuficiencia", 3L);
+
+        Map<String, Long> foco = new LinkedHashMap<>();
+        foco.put("Aortico", 2L);
+        foco.put("Mitral", 3L);
+
+        Map<String, Long> institucion = new LinkedHashMap<>();
+        institucion.put("Hospital Norte", 2L);
+        institucion.put("Hospital Sur", 3L);
+
+        Map<String, Long> month = new LinkedHashMap<>();
+        month.put("2026-01", 1L);
+        month.put("2026-02", 2L);
+        month.put("2026-03", 2L);
+
+        Map<String, Long> valvAge = new LinkedHashMap<>();
+        valvAge.put("0-17", 1L);
+        valvAge.put("18-35", 2L);
+        valvAge.put("36-59", 1L);
+        valvAge.put("60+", 1L);
+
+        Map<String, Long> valvGender = new LinkedHashMap<>();
+        valvGender.put("F", 2L);
+        valvGender.put("M", 3L);
+
+        Map<String, Long> valvDisease = new LinkedHashMap<>();
+        valvDisease.put("CON ENFERMEDAD DE BASE", 4L);
+        valvDisease.put("SIN ENFERMEDAD DE BASE", 1L);
+
+        lenient().when(dashboardDiagnosticService.getByNormalStatus()).thenReturn(normalStatus);
+        lenient().when(dashboardDiagnosticService.getByCategoriaAnomalia()).thenReturn(categoria);
+        lenient().when(dashboardDiagnosticService.getByFoco()).thenReturn(foco);
+        lenient().when(dashboardDiagnosticService.getByInstitucion()).thenReturn(institucion);
+        lenient().when(dashboardDiagnosticService.getByMonth()).thenReturn(month);
+        lenient().when(dashboardDiagnosticService.getValvulopathiesByAgeRange()).thenReturn(valvAge);
+        lenient().when(dashboardDiagnosticService.getValvulopathiesByGender()).thenReturn(valvGender);
+        lenient().when(dashboardDiagnosticService.getValvulopathiesByUnderlyingDiseases()).thenReturn(valvDisease);
+        lenient().when(dashboardDiagnosticService.getTotalRegistros()).thenReturn(5L);
     }
 
     private void mockCompleteDashboardData() {
