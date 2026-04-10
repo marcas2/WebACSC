@@ -12,6 +12,7 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
         SELECT d
         FROM DiagnosticEntity d
         LEFT JOIN FETCH d.usuarioCrea uc
+        JOIN FETCH d.institucion i
         ORDER BY d.creadoEn DESC, d.id DESC
     """)
     List<DiagnosticEntity> findAllWithUsuarioCrea();
@@ -20,6 +21,7 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
         SELECT d
         FROM DiagnosticEntity d
         LEFT JOIN FETCH d.usuarioCrea uc
+        JOIN FETCH d.institucion i
         WHERE uc.id = :creatorId
         ORDER BY d.creadoEn DESC, d.id DESC
     """)
@@ -111,10 +113,11 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
     List<Object[]> countByFoco();
 
     @Query("""
-        SELECT d.institucion, COUNT(d)
+        SELECT i.nombre, COUNT(d)
         FROM DiagnosticEntity d
-        GROUP BY d.institucion
-        ORDER BY d.institucion
+        JOIN d.institucion i
+        GROUP BY i.nombre
+        ORDER BY i.nombre
     """)
     List<Object[]> countByInstitucion();
 

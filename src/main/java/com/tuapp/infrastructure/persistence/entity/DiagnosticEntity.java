@@ -28,8 +28,9 @@ public class DiagnosticEntity {
     @Column(nullable = false)
     private Integer edad;
 
-    @Column(nullable = false, length = 150)
-    private String institucion;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "institucion_id", nullable = false)
+    private InstitucionEntity institucion;
 
     @Column(nullable = false)
     private Double altura;
@@ -88,8 +89,8 @@ public class DiagnosticEntity {
     public Integer getEdad() { return edad; }
     public void setEdad(Integer edad) { this.edad = edad; }
 
-    public String getInstitucion() { return institucion; }
-    public void setInstitucion(String institucion) { this.institucion = institucion; }
+    public InstitucionEntity getInstitucion() { return institucion; }
+    public void setInstitucion(InstitucionEntity institucion) { this.institucion = institucion; }
 
     public Double getAltura() { return altura; }
     public void setAltura(Double altura) { this.altura = altura; }

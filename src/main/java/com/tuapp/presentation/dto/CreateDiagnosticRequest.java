@@ -5,8 +5,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
@@ -14,9 +14,8 @@ import java.util.List;
 
 public class CreateDiagnosticRequest {
 
-    @NotBlank(message = "institucion es obligatorio")
-    @Size(max = 150, message = "institucion no puede superar 150 caracteres")
-    private String institucion;
+    @NotNull(message = "institucionId es obligatorio")
+    private Long institucionId;
 
     @NotNull(message = "esNormal es obligatorio")
     @JsonAlias("isNormal")
@@ -63,12 +62,12 @@ public class CreateDiagnosticRequest {
 
     private List<Long> enfermedadesBaseIds = new ArrayList<>();
 
-    public String getInstitucion() {
-        return institucion;
+    public Long getInstitucionId() {
+        return institucionId;
     }
 
-    public void setInstitucion(String institucion) {
-        this.institucion = institucion;
+    public void setInstitucionId(Long institucionId) {
+        this.institucionId = institucionId;
     }
 
     public Boolean getEsNormal() {

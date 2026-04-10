@@ -8,7 +8,9 @@ import com.tuapp.infrastructure.persistence.entity.CategoriaAnomaliaEntity;
 import com.tuapp.infrastructure.persistence.entity.DiagnosticEntity;
 import com.tuapp.infrastructure.persistence.entity.EnfermedadBaseEntity;
 import com.tuapp.infrastructure.persistence.entity.FocoEntity;
+import com.tuapp.infrastructure.persistence.entity.InstitucionEntity;
 import com.tuapp.infrastructure.persistence.entity.UserEntity;
+import com.tuapp.infrastructure.persistence.repository.InstitucionJpaRepository;
 import com.tuapp.infrastructure.persistence.repository.UserJpaRepository;
 import com.tuapp.presentation.dto.CreateDiagnosticRequest;
 import org.springframework.stereotype.Service;
@@ -26,17 +28,20 @@ public class CreateDiagnosticUseCase {
     private final CategoriaAnomaliaRepository categoriaAnomaliaRepository;
     private final EnfermedadBaseRepository enfermedadBaseRepository;
     private final UserJpaRepository userJpaRepository;
+    private final InstitucionJpaRepository institucionJpaRepository;
 
     public CreateDiagnosticUseCase(DiagnosticRepository diagnosticRepository,
                                    FocoRepository focoRepository,
                                    CategoriaAnomaliaRepository categoriaAnomaliaRepository,
                                    EnfermedadBaseRepository enfermedadBaseRepository,
-                                   UserJpaRepository userJpaRepository) {
+                                   UserJpaRepository userJpaRepository,
+                                   InstitucionJpaRepository institucionJpaRepository) {
         this.diagnosticRepository = diagnosticRepository;
         this.focoRepository = focoRepository;
         this.categoriaAnomaliaRepository = categoriaAnomaliaRepository;
         this.enfermedadBaseRepository = enfermedadBaseRepository;
         this.userJpaRepository = userJpaRepository;
+        this.institucionJpaRepository = institucionJpaRepository;
     }
 
     @Transactional
@@ -52,13 +57,15 @@ public class CreateDiagnosticUseCase {
         List<EnfermedadBaseEntity> enfermedades = enfermedadBaseRepository.findAllById(enfermedadesIds);
         UserEntity usuarioCrea = userJpaRepository.findById(request.getUsuarioCreaId())
                 .orElseThrow(() -> new IllegalArgumentException("usuarioCreaId no existe"));
+        InstitucionEntity institucion = institucionJpaRepository.findById(request.getInstitucionId())
+            .orElseThrow(() -> new IllegalArgumentException("institucionId no existe"));
 
         if (enfermedades.size() != enfermedadesIds.size()) {
             throw new IllegalArgumentException("Uno o más enfermedadesBaseIds no existen");
         }
 
         DiagnosticEntity entity = new DiagnosticEntity();
-        entity.setInstitucion(normalizeText(request.getInstitucion()));
+        entity.setInstitucion(institucion);
         entity.setEsNormal(request.getEsNormal());
         entity.setEdad(request.getEdad());
         entity.setGenero(normalizeGender(request.getGenero()));

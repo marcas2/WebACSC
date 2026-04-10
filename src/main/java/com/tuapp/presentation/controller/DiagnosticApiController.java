@@ -44,7 +44,8 @@ public class DiagnosticApiController {
         response.put("message", "Diagnóstico creado correctamente");
         response.put("id", saved.getId());
         response.put("creadoEn", saved.getCreadoEn());
-        response.put("institucion", saved.getInstitucion());
+        response.put("institucionId", saved.getInstitucion().getId());
+        response.put("institucionNombre", saved.getInstitucion().getNombre());
         response.put("esNormal", saved.getEsNormal());
         response.put("edad", saved.getEdad());
         response.put("genero", saved.getGenero());
@@ -123,7 +124,8 @@ public class DiagnosticApiController {
         Map<String, Object> item = new LinkedHashMap<>();
         item.put("id", diagnostic.getId());
         item.put("creadoEn", diagnostic.getCreadoEn());
-        item.put("institucion", diagnostic.getInstitucion());
+        item.put("institucionId", diagnostic.getInstitucion().getId());
+        item.put("institucionNombre", diagnostic.getInstitucion().getNombre());
         item.put("esNormal", diagnostic.getEsNormal());
         item.put("verificado", diagnostic.getVerificado());
         item.put("valvulopatia", diagnostic.getValvulopatia());
