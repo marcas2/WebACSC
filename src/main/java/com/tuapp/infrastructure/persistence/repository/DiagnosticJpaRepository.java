@@ -112,13 +112,13 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
     """)
     List<Object[]> countByFoco();
 
-    @Query("""
-        SELECT i.nombre, COUNT(d)
-        FROM DiagnosticEntity d
-        JOIN d.institucion i
-        GROUP BY i.nombre
+    @Query(value = """
+        SELECT i.nombre, COUNT(d.id)
+        FROM instituciones i
+        LEFT JOIN diagnostics d ON d.institucion_id = i.id
+        GROUP BY i.id, i.nombre
         ORDER BY i.nombre
-    """)
+    """, nativeQuery = true)
     List<Object[]> countByInstitucion();
 
     @Query(value = """
