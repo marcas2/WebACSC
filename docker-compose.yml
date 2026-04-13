@@ -18,7 +18,7 @@ services:
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       APP_JWT_SECRET: ${APP_JWT_SECRET:-bXlfc3VwZXJfc2VjcmV0X2tleV8zMl9ieXRlc19taW5pbW9fYmFzZTY0X3Rlc3Q=}
       APP_JWT_EXPIRATION_MS: ${APP_JWT_EXPIRATION_MS:-86400000}
-      APP_APK_RESOURCE_PATH: ${APP_APK_RESOURCE_PATH:-file:/app/apk/acsc.apk}
+      APP_APK_RESOURCE_PATH: file:/app/apk/acsc.apk
       APP_APK_DOWNLOAD_NAME: ${APP_APK_DOWNLOAD_NAME:-acsc.apk}
 
     ports:
