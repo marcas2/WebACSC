@@ -18,7 +18,7 @@ public interface UserRepository {
     List<User> findAll();
 
     User save(User user);
-    void deleteById(Long id);
+    void deleteById(Long id, boolean deleteDiagnostics);
 
     void updatePassword(Long userId, String passwordHash);
 }

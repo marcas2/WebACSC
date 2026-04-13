@@ -4,6 +4,8 @@ import com.tuapp.domain.model.User;
 import com.tuapp.domain.repository.UserRepository;
 import com.tuapp.infrastructure.persistence.entity.UserEntity;
 import com.tuapp.infrastructure.persistence.mapper.UserMapper;
+import org.springframework.core.NestedExceptionUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,10 +16,14 @@ import java.util.Optional;
 public class UserRepositoryImpl implements UserRepository {
 
     private final UserJpaRepository jpaRepository;
+    private final DiagnosticJpaRepository diagnosticJpaRepository;
     private final UserMapper mapper;
 
-    public UserRepositoryImpl(UserJpaRepository jpaRepository, UserMapper mapper) {
+    public UserRepositoryImpl(UserJpaRepository jpaRepository,
+                              DiagnosticJpaRepository diagnosticJpaRepository,
+                              UserMapper mapper) {
         this.jpaRepository = jpaRepository;
+        this.diagnosticJpaRepository = diagnosticJpaRepository;
         this.mapper = mapper;
     }
 
@@ -71,11 +77,34 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     @Transactional
-    public void deleteById(Long id) {
+    public void deleteById(Long id, boolean deleteDiagnostics) {
         if (!jpaRepository.existsById(id)) {
             throw new IllegalArgumentException("Usuario no encontrado");
         }
-        jpaRepository.deleteById(id);
+
+        long diagnosticsCount = diagnosticJpaRepository.countByUsuarioCrea_Id(id);
+        if (diagnosticsCount > 0 && !deleteDiagnostics) {
+            throw new IllegalArgumentException("El usuario tiene diagnósticos asociados");
+        }
+
+        try {
+            if (deleteDiagnostics && diagnosticsCount > 0) {
+                diagnosticJpaRepository.deleteDiagnosticDiseaseLinksByUsuarioCreaId(id);
+                diagnosticJpaRepository.deleteByUsuarioCreaIdNative(id);
+            }
+
+            jpaRepository.deleteById(id);
+            jpaRepository.flush();
+        } catch (DataIntegrityViolationException ex) {
+            Throwable rootCause = NestedExceptionUtils.getMostSpecificCause(ex);
+            String rootMessage = rootCause == null ? "" : rootCause.getMessage();
+
+            if (rootMessage != null && rootMessage.toLowerCase().contains("fk_diagnostics_usuario_crea")) {
+                throw new IllegalArgumentException("El usuario tiene diagnósticos asociados");
+            }
+
+            throw new IllegalArgumentException("No se puede eliminar el usuario porque tiene registros asociados");
+        }
     }
 
     @Override

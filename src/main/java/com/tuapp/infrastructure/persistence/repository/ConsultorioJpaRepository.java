@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface ConsultorioJpaRepository extends JpaRepository<ConsultorioEntity, Long> {
     List<ConsultorioEntity> findByInstitucionIdOrderByNombreAsc(Long institucionId);
+    boolean existsByInstitucionId(Long institucionId);
+    void deleteByInstitucionId(Long institucionId);
     boolean existsByCodigoIgnoreCase(String codigo);
     boolean existsByCodigoIgnoreCaseAndIdNot(String codigo, Long id);
     boolean existsByNombreIgnoreCaseAndInstitucionId(String nombre, Long institucionId);

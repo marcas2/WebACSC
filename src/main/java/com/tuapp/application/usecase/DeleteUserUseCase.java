@@ -14,7 +14,7 @@ public class DeleteUserUseCase {
     }
 
     @Transactional
-    public void execute(Long userId) {
-        userRepository.deleteById(userId);
+    public void execute(Long userId, boolean deleteDiagnostics) {
+        userRepository.deleteById(userId, deleteDiagnostics);
     }
 }

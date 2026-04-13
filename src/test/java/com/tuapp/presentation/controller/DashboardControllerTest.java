@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ExtendedModelMap;
@@ -28,11 +29,18 @@ class DashboardControllerTest {
     @Mock
     private DashboardDiagnosticService dashboardDiagnosticService;
 
+    @Mock
+    private ResourceLoader resourceLoader;
+
     private DashboardController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new DashboardController(dashboardDiagnosticService);
+        controller = new DashboardController(
+                dashboardDiagnosticService,
+                resourceLoader,
+                "classpath:static/apk/webacsc.apk",
+                "webacsc.apk");
     }
 
     @Test
@@ -203,6 +211,24 @@ class DashboardControllerTest {
         assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
         assertNotNull(response.getBody());
         assertEquals("No se pudo generar el archivo de exportación.", new String(response.getBody()));
+    }
+
+    @Test
+    void shouldReturn404WhenApkIsNotAvailable() {
+        org.springframework.core.io.Resource missingResource =
+                new org.springframework.core.io.ByteArrayResource(new byte[0]) {
+                    @Override
+                    public boolean exists() {
+                        return false;
+                    }
+                };
+        when(resourceLoader.getResource("classpath:static/apk/webacsc.apk")).thenReturn(missingResource);
+
+        ResponseEntity<byte[]> response = controller.downloadApk();
+
+        assertEquals(404, response.getStatusCode().value());
+        assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
+        assertNotNull(response.getBody());
     }
 
     private void mockExportDashboardData() {

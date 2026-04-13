@@ -2,100 +2,424 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de usuarios</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Gestión de usuarios · Panel administrativo</title>
+
+    <!-- Tailwind CSS + config extendida (mismos colores y sombras que el dashboard) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Google Fonts (Plus Jakarta Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui']
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f4f8fb',
+                            100: '#e8f0f7',
+                            200: '#d4e4f0',
+                            300: '#aecedf',
+                            400: '#7faec8',
+                            500: '#568eaf',
+                            600: '#3d7293',
+                            700: '#2f5b77',
+                            800: '#284b63',
+                            900: '#243f53'
+                        }
+                    },
+                    boxShadow: {
+                        soft: '0 18px 45px rgba(36, 63, 83, 0.08)',
+                        card: '0 12px 30px rgba(36, 63, 83, 0.07)'
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f3f4f8; color: #1a1a2e; }
-        .container { max-width: 1250px; margin: 0 auto; padding: 2rem; }
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .btn { text-decoration: none; background: #3266ad; color: #fff; padding: 10px 16px; border-radius: 6px; font-size: 14px; border: none; cursor: pointer; }
-        .btn-danger { background: #b53a3a; }
-        .btn-secondary { background: #777; }
-        .message { margin-bottom: 1rem; padding: 12px 14px; border-radius: 8px; font-size: 14px; }
-        .success { background: #edf8f1; border: 1px solid #b8e0c2; color: #2d7a55; }
-        .error { background: #fff4f0; border: 1px solid #f5c4b3; color: #993c1d; }
-        .card { background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
-        th, td { padding: 12px; border-bottom: 1px solid #eaeef5; text-align: left; vertical-align: top; }
-        th { background: #3266ad; color: #fff; }
-        form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        input, select { padding: 8px 10px; border: 1px solid #d7dce5; border-radius: 6px; }
-        .small { font-size: 12px; color: #666; margin-top: 6px; }
+        /* transiciones y scroll suave */
+        html { scroll-behavior: smooth; }
+        body {
+            background: radial-gradient(circle at top left, rgba(212, 228, 240, 0.4) 0%, #ffffff 70%);
+        }
+        /* mejorar focus visible */
+        *:focus-visible {
+            outline: 2px solid #3d7293;
+            outline-offset: 2px;
+            border-radius: 8px;
+        }
+        /* transiciones en botones y tarjetas */
+        .card-hover {
+            transition: all 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.08);
+        }
+        /* Scrollbar elegante */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #eef2f6; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #7faec8; border-radius: 10px; }
     </style>
 </head>
-<body>
-<div class="container">
-    <div class="topbar">
-        <h1>Gestión de usuarios</h1>
-        <a class="btn btn-secondary" th:href="@{/dashboard}">Volver al dashboard</a>
+<body class="font-sans text-slate-700 antialiased">
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
+    <!-- Header con navegación y título -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-3 border-b border-slate-200">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-brand-900 flex items-center gap-2">
+                <svg class="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Gestión de usuarios
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">Administra cuentas, roles y credenciales del sistema</p>
+        </div>
+        <a th:href="@{/dashboard}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-brand-300 hover:text-brand-800 hover:shadow-md">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Volver al dashboard
+        </a>
     </div>
 
-    <div th:if="${success}" class="message success" th:text="${success}"></div>
-    <div th:if="${error}" class="message error" th:text="${error}"></div>
+    <!-- Mensajes flash (success/error) se mostrarán con SweetAlert automáticamente -->
+    <div th:if="${success}" id="flashSuccess" th:data-message="${success}" class="hidden"></div>
+    <div th:if="${error}" id="flashError" th:data-message="${error}" class="hidden"></div>
+    <div th:if="${pendingDeleteUserId != null}" id="pendingDeleteData" th:data-userid="${pendingDeleteUserId}" class="hidden"></div>
 
-    <div class="card">
-        <h2 style="margin-top:0;">Crear usuario</h2>
-        <form th:action="@{/dashboard/users/create}" method="post">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Contraseña segura" required>
-            <select name="roleName" required>
-                <option value="USER">USER</option>
-                <option value="ADMIN">ADMIN</option>
-                <option value="SUPER_USER">SUPER_USER</option>
-            </select>
-            <button type="submit" class="btn">Crear usuario</button>
+    <!-- Tarjeta: Crear usuario (diseño moderno) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-card p-6 md:p-7 mb-8 card-hover">
+        <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2 mb-5">
+            <svg class="w-5 h-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+            Crear nuevo usuario
+        </h2>
+        <form id="createUserForm" th:action="@{/dashboard/users/create}" method="post" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Nombre usuario</label>
+                <input type="text" name="username" id="createUsername" placeholder="ej. jperez" required
+                       class="w-full rounded-xl border-slate-200 shadow-sm focus:border-brand-400 focus:ring-brand-300 transition">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Email</label>
+                <input type="email" name="email" id="createEmail" placeholder="usuario@dominio.com" required
+                       class="w-full rounded-xl border-slate-200 shadow-sm focus:border-brand-400">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Contraseña</label>
+                <input type="password" name="password" id="createPassword" placeholder="••••••••" required
+                       class="w-full rounded-xl border-slate-200 shadow-sm focus:border-brand-400">
+                <p class="text-xs text-slate-400 mt-1">Mayúscula, minúscula, número y símbolo</p>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Rol</label>
+                <select name="roleName" required class="w-full rounded-xl border-slate-200 shadow-sm bg-white py-2.5">
+                    <option value="USER">👤 USER</option>
+                    <option value="ADMIN">⚙️ ADMIN</option>
+                    <option value="SUPER_USER">🌟 SUPER_USER</option>
+                </select>
+            </div>
+            <div class="sm:col-span-2 lg:col-span-4 flex justify-end">
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-800 px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-brand-700 transition-all hover:-translate-y-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Crear usuario
+                </button>
+            </div>
         </form>
-        <div class="small">La contraseña debe tener mayúscula, minúscula, número y símbolo.</div>
     </div>
 
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Usuario</th>
-            <th>Email</th>
-            <th>Rol actual</th>
-            <th>Editar</th>
-            <th>Cambiar contraseña</th>
-            <th>Eliminar</th>
-        </tr>
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
+    <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-brand-800">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">ID</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Usuario</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Email</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Rol</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase">Acciones</th>
+            </tr>
         </thead>
-        <tbody>
-        <tr th:each="user : ${users}">
-            <td th:text="${user.id}">1</td>
-            <td th:text="${user.nombreUsuario}">usuario</td>
-            <td th:text="${user.email}">correo@correo.com</td>
-            <td th:text="${user.roleName}">USER</td>
 
-            <td>
-                <form th:action="@{/dashboard/users/{id}/edit(id=${user.id})}" method="post">
-                    <input type="text" name="username" th:value="${user.nombreUsuario}" required>
-                    <input type="email" name="email" th:value="${user.email}" required>
-                    <select name="roleName" required>
-                        <option value="USER" th:selected="${user.roleName == 'USER'}">USER</option>
-                        <option value="ADMIN" th:selected="${user.roleName == 'ADMIN'}">ADMIN</option>
-                        <option value="SUPER_USER" th:selected="${user.roleName == 'SUPER_USER'}">SUPER_USER</option>
-                    </select>
-                    <button type="submit" class="btn">Guardar</button>
-                </form>
-            </td>
+        <tbody class="divide-y divide-slate-100 bg-white">
+            <tr th:each="user : ${users}" class="hover:bg-slate-50 transition">
 
-            <td>
-                <form th:action="@{/dashboard/users/{id}/password(id=${user.id})}" method="post">
-                    <input type="password" name="newPassword" required placeholder="Nueva contraseña">
-                    <button type="submit" class="btn">Cambiar clave</button>
-                </form>
-            </td>
+                <form class="editUserForm"
+                      th:action="@{/dashboard/users/{id}/edit(id=${user.id})}"
+                      method="post">
 
-            <td>
-                <form th:action="@{/dashboard/users/{id}/delete(id=${user.id})}" method="post"
-                      onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                    <!-- ID -->
+                    <td class="px-4 py-4 text-sm font-semibold text-slate-500">
+                        <span th:text="${user.id}"></span>
+                    </td>
+
+                    <!-- Usuario (editable) -->
+                    <td class="px-4 py-4">
+                        <input type="text" name="username"
+                               th:value="${user.nombreUsuario}" required
+                               class="w-full rounded-lg border-slate-200 text-sm focus:ring-brand-300">
+                    </td>
+
+                    <!-- Email (editable) -->
+                    <td class="px-4 py-4">
+                        <input type="email" name="email"
+                               th:value="${user.email}" required
+                               class="w-full rounded-lg border-slate-200 text-sm focus:ring-brand-300">
+                    </td>
+
+                    <!-- Rol (editable) -->
+                    <td class="px-4 py-4">
+                        <select name="roleName"
+                                class="w-full rounded-lg border-slate-200 text-sm bg-white">
+                            <option value="USER" th:selected="${user.roleName == 'USER'}">USER</option>
+                            <option value="ADMIN" th:selected="${user.roleName == 'ADMIN'}">ADMIN</option>
+                            <option value="SUPER_USER" th:selected="${user.roleName == 'SUPER_USER'}">SUPER_USER</option>
+                        </select>
+                    </td>
+
+                    <!-- Acciones -->
+                    <td class="px-4 py-4">
+                        <div class="flex flex-col gap-2">
+
+                            <!-- Guardar -->
+                            <button type="submit"
+                                    class="w-full bg-brand-600 text-white py-1.5 rounded-lg text-xs font-semibold hover:bg-brand-700">
+                                Guardar cambios
+                            </button>
+
                 </form>
-            </td>
-        </tr>
+
+                           
+
+                            <!-- Eliminar -->
+                            <form class="deleteUserForm"
+                                  th:action="@{/dashboard/users/{id}/delete(id=${user.id})}"
+                                  method="post">
+
+                                <button type="submit"
+                                        class="w-full bg-red-600 text-white py-1.5 rounded-lg text-xs font-semibold hover:bg-red-700">
+                                    Eliminar
+                                </button>
+                            </form>
+                             <!-- Password -->
+                            <form class="changePwdForm flex gap-2"
+                                  th:action="@{/dashboard/users/{id}/password(id=${user.id})}"
+                                  method="post">
+
+                                <input type="password" name="newPassword"
+                                       placeholder="Nueva contraseña"
+                                       class="flex-1 rounded-lg border-slate-200 text-xs">
+
+                                <button type="submit"
+                                        class="bg-slate-700 text-white px-2 py-1 rounded-lg text-xs hover:bg-slate-800">
+                                    Cambiar
+                                </button>
+                            </form>
+
+                        </div>
+                    </td>
+
+            </tr>
+
+            <tr th:if="${users.isEmpty()}">
+                <td colspan="5" class="px-5 py-8 text-center text-slate-400">
+                    No hay usuarios registrados
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>
+
+<script>
+    (function() {
+        // ---------- FUNCIÓN PARA MOSTRAR SWEETALERT (toast o modal) ----------
+        function showToast(icon, title, text = '') {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: icon,
+                title: title,
+                text: text,
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                background: '#fff',
+                didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
+            });
+        }
+
+        function showConfirmDialog(options) {
+            return Swal.fire({
+                title: options.title || '¿Estás seguro?',
+                text: options.text || '',
+                icon: options.icon || 'warning',
+                showCancelButton: true,
+                confirmButtonColor: options.confirmColor || '#284b63',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: options.confirmText || 'Sí, continuar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            });
+        }
+
+        // Mostrar mensajes flash provenientes del backend (success/error)
+        const flashSuccess = document.getElementById('flashSuccess');
+        if(flashSuccess && flashSuccess.dataset.message) {
+            showToast('success', '¡Éxito!', flashSuccess.dataset.message);
+        }
+        const flashError = document.getElementById('flashError');
+        if(flashError && flashError.dataset.message) {
+            showToast('error', 'Error', flashError.dataset.message);
+        }
+
+        // Manejo especial: eliminación forzada por diagnósticos (pendingDeleteUserId)
+        const pendingData = document.getElementById('pendingDeleteData');
+        if(pendingData && pendingData.dataset.userid) {
+            const userId = pendingData.dataset.userid;
+            Swal.fire({
+                title: 'Usuario con diagnósticos asociados',
+                html: `<p class="text-left">Este usuario tiene <strong>diagnósticos vinculados</strong>. Para eliminarlo, debes eliminar también sus registros clínicos.</p>
+                       <p class="text-left mt-2">¿Deseas eliminar el usuario <strong>y todos sus diagnósticos</strong> de forma permanente?</p>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#b53a3a',
+                confirmButtonText: 'Sí, eliminar usuario y diagnósticos',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    // Enviar formulario especial con deleteDiagnostics=true
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/dashboard/users/${userId}/delete`;
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'deleteDiagnostics';
+                    input.value = 'true';
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                } else {
+                    window.location.href = '/dashboard/users'; // recargar sin acción
+                }
+            });
+        }
+
+        // ---------- VALIDACIÓN DE CONTRASEÑA FUERTE ----------
+        function isStrongPassword(password) {
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_\-+])[A-Za-z\d@$!%*?&_\-+]{8,}$/;
+            return regex.test(password);
+        }
+
+        // ---------- FORMULARIO CREACIÓN USUARIO ----------
+        const createForm = document.getElementById('createUserForm');
+        if(createForm) {
+            createForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('createUsername').value.trim();
+                const email = document.getElementById('createEmail').value.trim();
+                const password = document.getElementById('createPassword').value;
+                const role = createForm.querySelector('select[name="roleName"]').value;
+
+                if(!username || !email || !password) {
+                    showToast('error', 'Campos incompletos', 'Completa todos los campos requeridos.');
+                    return;
+                }
+                if(!isStrongPassword(password)) {
+                    showToast('error', 'Contraseña débil', 'Debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.');
+                    return;
+                }
+                // Confirmación previa antes de enviar
+                const confirm = await showConfirmDialog({
+                    title: 'Crear nuevo usuario',
+                    text: `¿Deseas registrar al usuario "${username}" con rol ${role}?`,
+                    icon: 'question',
+                    confirmText: 'Crear usuario'
+                });
+                if(confirm.isConfirmed) {
+                    createForm.submit();
+                }
+            });
+        }
+
+        // ---------- EDICIÓN DE USUARIO (sweet alert confirmación y validación) ----------
+        const editForms = document.querySelectorAll('.editUserForm');
+        editForms.forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const usernameInput = form.querySelector('input[name="username"]');
+                const emailInput = form.querySelector('input[name="email"]');
+                const username = usernameInput.value.trim();
+                const email = emailInput.value.trim();
+                const role = form.querySelector('select[name="roleName"]').value;
+                if(!username || !email) {
+                    showToast('error', 'Datos inválidos', 'Usuario y email son obligatorios');
+                    return;
+                }
+                const confirm = await showConfirmDialog({
+                    title: 'Actualizar usuario',
+                    text: `¿Guardar cambios para "${username}"?`,
+                    icon: 'info',
+                    confirmText: 'Actualizar'
+                });
+                if(confirm.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+
+        // ---------- CAMBIO DE CONTRASEÑA (validación y confirmación) ----------
+        const pwdForms = document.querySelectorAll('.changePwdForm');
+        pwdForms.forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const pwdInput = form.querySelector('input[name="newPassword"]');
+                const newPwd = pwdInput.value;
+                if(!newPwd) {
+                    showToast('error', 'Contraseña vacía', 'Ingresa una nueva contraseña.');
+                    return;
+                }
+                if(!isStrongPassword(newPwd)) {
+                    showToast('error', 'Formato incorrecto', 'La contraseña debe tener al menos 8 caracteres, una mayúscula, minúscula, número y símbolo.');
+                    return;
+                }
+                const confirm = await showConfirmDialog({
+                    title: 'Cambiar contraseña',
+                    text: '¿Estás seguro de actualizar la contraseña de este usuario? La acción es inmediata.',
+                    icon: 'warning',
+                    confirmText: 'Sí, cambiar'
+                });
+                if(confirm.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+
+        // ---------- ELIMINACIÓN DE USUARIO (con opción de manejo de diagnóstico) ----------
+        const deleteForms = document.querySelectorAll('.deleteUserForm');
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userId = form.getAttribute('th:data-userid') || form.dataset.userid;
+                const result = await showConfirmDialog({
+                    title: 'Eliminar usuario',
+                    text: '¿Seguro que deseas eliminar este usuario? Si tiene diagnósticos asociados, se te pedirá una confirmación adicional.',
+                    icon: 'error',
+                    confirmColor: '#b53a3a',
+                    confirmText: 'Eliminar'
+                });
+                if(result.isConfirmed) {
+                    // Enviamos el formulario normal. Si el backend responde con error por diagnósticos, la página recargará con el mensaje pendingDeleteUserId
+                    form.submit();
+                }
+            });
+        });
+    })();
+</script>
 </body>
 </html>

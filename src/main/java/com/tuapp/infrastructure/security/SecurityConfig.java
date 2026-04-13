@@ -44,7 +44,7 @@ public class SecurityConfig {
                     "/webjars/**",
                     "/error"
                 ).permitAll()
-                .requestMatchers("/dashboard/users/**").hasAnyRole("SUPER_USER", "ADMIN")
+                .requestMatchers("/dashboard/users/**").hasRole("SUPER_USER")
                 .requestMatchers("/dashboard/instituciones/**").hasAnyRole("SUPER_USER", "ADMIN")
                 .requestMatchers("/dashboard/focos/**").hasAnyRole("SUPER_USER", "ADMIN")
                 .requestMatchers("/dashboard/categorias-anomalias/**").hasAnyRole("SUPER_USER", "ADMIN")

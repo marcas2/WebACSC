@@ -6,6 +6,9 @@ import com.tuapp.util.ExcelExportUtil;
 import com.tuapp.util.PdfExportUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,9 +32,18 @@ public class DashboardController {
     private static final Logger log = LoggerFactory.getLogger(DashboardController.class);
 
     private final DashboardDiagnosticService dashboardDiagnosticService;
+    private final ResourceLoader resourceLoader;
+    private final String apkResourcePath;
+    private final String apkDownloadName;
 
-    public DashboardController(DashboardDiagnosticService dashboardDiagnosticService) {
+    public DashboardController(DashboardDiagnosticService dashboardDiagnosticService,
+                               ResourceLoader resourceLoader,
+                               @Value("${app.apk.resource-path:classpath:static/apk/webacsc.apk}") String apkResourcePath,
+                               @Value("${app.apk.download-name:webacsc.apk}") String apkDownloadName) {
         this.dashboardDiagnosticService = dashboardDiagnosticService;
+        this.resourceLoader = resourceLoader;
+        this.apkResourcePath = apkResourcePath;
+        this.apkDownloadName = apkDownloadName;
     }
 
     @GetMapping("/dashboard")
@@ -101,6 +114,30 @@ public class DashboardController {
             @RequestParam String format,
             Authentication authentication) {
         return exportInternal(format, DashboardQueryFilters.empty());
+    }
+
+    @GetMapping("/dashboard/apk/download")
+    public ResponseEntity<byte[]> downloadApk() {
+        try {
+            Resource resource = resourceLoader.getResource(apkResourcePath);
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.status(404)
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .body("No se encontro el archivo APK para descargar.".getBytes());
+            }
+
+            byte[] apkBytes = resource.getInputStream().readAllBytes();
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + apkDownloadName + "\"")
+                    .contentType(MediaType.parseMediaType("application/vnd.android.package-archive"))
+                    .body(apkBytes);
+        } catch (IOException ex) {
+            log.error("Error descargando APK", ex);
+            return ResponseEntity.internalServerError()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("No se pudo descargar el APK en este momento.".getBytes());
+        }
     }
 
     private String renderDashboard(Authentication authentication, Model model, DashboardQueryFilters filters) {

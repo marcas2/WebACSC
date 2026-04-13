@@ -2,11 +2,51 @@ package com.tuapp.infrastructure.persistence.repository;
 
 import com.tuapp.infrastructure.persistence.entity.DiagnosticEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity, Long> {
+
+    long countByUsuarioCrea_Id(Long userId);
+    long countByInstitucion_Id(Long institucionId);
+
+    @Modifying
+    @Query(value = """
+        DELETE FROM diagnostics_enfermedades_base
+        WHERE diagnostic_id IN (
+            SELECT id
+            FROM diagnostics
+            WHERE usuario_crea_id = :userId
+        )
+    """, nativeQuery = true)
+    int deleteDiagnosticDiseaseLinksByUsuarioCreaId(@Param("userId") Long userId);
+
+    @Modifying
+    @Query(value = "DELETE FROM diagnostics WHERE usuario_crea_id = :userId", nativeQuery = true)
+    int deleteByUsuarioCreaIdNative(@Param("userId") Long userId);
+
+    @Modifying
+    @Query(value = """
+        DELETE FROM diagnostics_enfermedades_base
+        WHERE diagnostic_id IN (
+            SELECT id
+            FROM diagnostics
+            WHERE institucion_id = :institucionId
+        )
+    """, nativeQuery = true)
+    int deleteDiagnosticDiseaseLinksByInstitucionId(@Param("institucionId") Long institucionId);
+
+    @Modifying
+    @Query(value = "DELETE FROM diagnostics WHERE institucion_id = :institucionId", nativeQuery = true)
+    int deleteByInstitucionIdNative(@Param("institucionId") Long institucionId);
+
+    @Modifying
+    @Query(value = "UPDATE diagnostics SET institucion_id = :targetInstitucionId WHERE institucion_id = :sourceInstitucionId", nativeQuery = true)
+    int reassignInstitucion(@Param("sourceInstitucionId") Long sourceInstitucionId,
+                            @Param("targetInstitucionId") Long targetInstitucionId);
 
     @Query("""
         SELECT d
