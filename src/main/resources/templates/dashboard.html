@@ -12,6 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Chart.js para gráficos profesionales -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Font Awesome 6 (iconos modernos, sin emojis) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     
@@ -38,15 +40,19 @@
                     },
                     boxShadow: {
                         'card': '0 8px 20px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.05)',
-                        'soft': '0 12px 28px -8px rgba(0,0,0,0.08)'
+                        'soft': '0 12px 28px -8px rgba(0,0,0,0.08)',
+                        'hover': '0 20px 30px -12px rgba(0, 0, 0, 0.12)'
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.4s ease-out',
-                        'slide-up': 'slideUp 0.3s ease-out'
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'scale-in': 'scaleIn 0.2s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                     },
                     keyframes: {
                         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        slideUp: { '0%': { transform: 'translateY(12px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
+                        slideUp: { '0%': { transform: 'translateY(12px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+                        scaleIn: { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } }
                     }
                 }
             }
@@ -89,133 +95,198 @@
         }
         .nav-link {
             transition: all 0.2s;
+            position: relative;
         }
         .nav-link:hover {
             background-color: #f1f5f9;
             border-color: #cbd5e1;
         }
+        .nav-link.active {
+            background-color: #eef2ff;
+            border-color: #4a7ed4;
+            color: #3a62aa;
+        }
+        .dropdown-modules {
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        /* Efecto ripple para botones */
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+        .ripple:active:after {
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+        }
+        /* Animación escalonada para tarjetas */
+        .metric-card:nth-child(1) { animation-delay: 0s; }
+        .metric-card:nth-child(2) { animation-delay: 0.1s; }
+        .metric-card:nth-child(3) { animation-delay: 0.2s; }
     </style>
 </head>
 <body class="font-sans antialiased">
 
-<!-- Header superior simplificado, sin iconos -->
+<!-- Header superior con iconos -->
 <div class="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-20 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-brand-800 tracking-tight">Dashboard Clínico</h1>
-                <p class="text-sm text-slate-500 mt-0.5">
-                    Bienvenido, <strong class="text-slate-700" th:text="${username}"></strong> · 
-                    Rol: <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700" th:text="${role}"></span>
-                </p>
+            <div class="flex items-center gap-3">
+                <!-- Icono del nav (estetoscopio/corazón) -->
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-md">
+                    <i class="fas fa-stethoscope text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold text-brand-800 tracking-tight flex items-center gap-2">
+                        Dashboard Clínico
+                    </h1>
+                    <p class="text-sm text-slate-500 mt-0.5">
+                        <i class="fas fa-user-md mr-1 text-brand-400 text-xs"></i>
+                        Bienvenido, <strong class="text-slate-700" th:text="${username}"></strong> · 
+                        Rol: <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700" th:text="${role}"></span>
+                    </p>
+                </div>
             </div>
             <div class="flex gap-3">
                 <a th:href="@{/dashboard/apk/download}" 
-                   class="px-4 py-2 text-sm font-medium rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition shadow-sm"
+                   class="ripple px-4 py-2 text-sm font-medium rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition shadow-sm flex items-center gap-2"
                    onclick="confirmarDescargaAPK(event)">
-                    Descargar APK
+                    <i class="fas fa-download text-brand-500"></i> Descargar APK
                 </a>
                 <a th:href="@{/auth/logout}" 
-                   class="px-4 py-2 text-sm font-medium rounded-xl border border-red-200 text-red-700 hover:bg-red-50 transition">
-                    Cerrar sesión
+                   class="ripple px-4 py-2 text-sm font-medium rounded-xl border border-red-200 text-red-700 hover:bg-red-50 transition flex items-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar sesión
                 </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Barra de navegación secundaria para los módulos de gestión (sin iconos, más profesional) -->
+<!-- Barra de navegación para módulos de gestión (con iconos y mejor organización) -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" sec:authorize="hasAnyAuthority('ROLE_SUPER_USER','ROLE_ADMIN')">
-    <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
+    <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
+        <!-- Módulos principales con iconos -->
         <a sec:authorize="hasAuthority('ROLE_SUPER_USER')" th:href="@{/dashboard/users}" 
-           class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition">
-            Usuarios
+           class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition flex items-center gap-2">
+            <i class="fas fa-users text-brand-500"></i> Usuarios
         </a>
         <a th:href="@{/dashboard/instituciones}" 
-           class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition">
-            Instituciones
+           class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition flex items-center gap-2">
+            <i class="fas fa-hospital text-brand-500"></i> Instituciones
         </a>
         <a th:href="@{/dashboard/focos}" 
-           class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition">
-            Focos
+           class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition flex items-center gap-2">
+            <i class="fas fa-microphone-alt text-brand-500"></i> Focos
         </a>
         <a th:href="@{/dashboard/categorias-anomalias}" 
-           class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition">
-            Categorías / Anomalías
+           class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition flex items-center gap-2">
+            <i class="fas fa-tags text-brand-500"></i> Categorías / Anomalías
         </a>
         <a th:href="@{/dashboard/enfermedades}" 
-           class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition">
-            Enfermedades base
+           class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition flex items-center gap-2">
+            <i class="fas fa-heartbeat text-brand-500"></i> Enfermedades base
         </a>
+        
+        <!-- Separador y acceso rápido a reportes (mejora de gestión) -->
+        <div class="h-6 w-px bg-slate-300 mx-1 hidden sm:block"></div>
+        <div class="relative group">
+            <button class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition flex items-center gap-2">
+                <i class="fas fa-chart-line text-brand-500"></i> Reportes Rápidos
+                <i class="fas fa-chevron-down text-xs ml-1"></i>
+            </button>
+            <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-soft border border-slate-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                <a href="#" onclick="exportarReporte('pdf'); return false;" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-t-xl">
+                    <i class="fas fa-file-pdf text-red-500"></i> Exportar PDF
+                </a>
+                <a href="#" onclick="exportarReporte('excel'); return false;" class="flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-b-xl">
+                    <i class="fas fa-file-excel text-emerald-600"></i> Exportar Excel
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
     <!-- Mensajes informativos / errores -->
-    <div th:if="${infoMessage}" class="animate-fade-in bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg shadow-sm">
-        <span th:text="${infoMessage}"></span>
+    <div th:if="${infoMessage}" class="animate-fade-in bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg shadow-sm flex items-center gap-2">
+        <i class="fas fa-info-circle"></i> <span th:text="${infoMessage}"></span>
     </div>
-    <div th:if="${errorMessage}" class="animate-fade-in bg-amber-50 border-l-4 border-amber-500 text-amber-700 p-4 rounded-lg shadow-sm">
-        <span th:text="${errorMessage}"></span>
+    <div th:if="${errorMessage}" class="animate-fade-in bg-amber-50 border-l-4 border-amber-500 text-amber-700 p-4 rounded-lg shadow-sm flex items-center gap-2">
+        <i class="fas fa-exclamation-triangle"></i> <span th:text="${errorMessage}"></span>
     </div>
 
-    <!-- Panel de filtros avanzados (sin iconos) -->
-    <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 transition-all duration-200 card-hover">
-        <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
-            <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Filtros avanzados</h2>
+    <!-- Panel de filtros avanzados + EXPORTACIÓN AL INICIO -->
+    <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 transition-all duration-200 card-hover animate-slide-up">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                <i class="fas fa-sliders-h text-brand-500"></i> Filtros avanzados
+            </h2>
             <div class="flex gap-2">
-                <button type="submit" form="filterForm" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-xl transition shadow-sm">
-                    Aplicar filtros
+                <button type="submit" form="filterForm" class="ripple px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-xl transition shadow-sm flex items-center gap-2">
+                    <i class="fas fa-filter"></i> Aplicar filtros
                 </button>
-                <a th:href="@{/dashboard}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-xl transition">
-                    Limpiar filtros
+                <a th:href="@{/dashboard}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-xl transition flex items-center gap-2">
+                    <i class="fas fa-eraser"></i> Limpiar filtros
                 </a>
             </div>
         </div>
+        
         <form id="filterForm" method="get" th:action="@{/dashboard}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">Diagnóstico</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1"><i class="fas fa-search mr-1"></i> Diagnóstico</label>
                 <input type="text" name="q" th:value="${filtroQ}" class="w-full rounded-xl border-slate-200 p-2.5 text-sm focus:border-brand-400" placeholder="Ej: soplo sistólico">
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">Institución</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1"><i class="fas fa-building mr-1"></i> Institución</label>
                 <select name="institucionId" class="w-full rounded-xl border-slate-200 p-2.5 text-sm bg-white">
                     <option value="">Todas</option>
                     <option th:each="entry : ${institucionOptions}" th:value="${entry.key}" th:text="${entry.value}" th:selected="${filtroInstitucionId != null and filtroInstitucionId == entry.key}"></option>
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">Foco auscultatorio</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1"><i class="fas fa-head-side-medical mr-1"></i> Foco auscultatorio</label>
                 <select name="focoId" class="w-full rounded-xl border-slate-200 p-2.5 text-sm bg-white">
                     <option value="">Todos</option>
                     <option th:each="entry : ${focoOptions}" th:value="${entry.key}" th:text="${entry.value}" th:selected="${filtroFocoId != null and filtroFocoId == entry.key}"></option>
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">Categoría de anomalía</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1"><i class="fas fa-exclamation-circle mr-1"></i> Categoría de anomalía</label>
                 <select name="categoriaId" class="w-full rounded-xl border-slate-200 p-2.5 text-sm bg-white">
                     <option value="">Todas</option>
                     <option th:each="entry : ${categoriaOptions}" th:value="${entry.key}" th:text="${entry.value}" th:selected="${filtroCategoriaId != null and filtroCategoriaId == entry.key}"></option>
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">Género</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1"><i class="fas fa-venus-mars mr-1"></i> Género</label>
                 <select name="genero" class="w-full rounded-xl border-slate-200 p-2.5 text-sm bg-white">
                     <option value="">Todos</option>
                     <option th:each="g : ${generoOptions}" th:value="${g}" th:text="${g}" th:selected="${filtroGenero != null and filtroGenero == g}"></option>
                 </select>
             </div>
             <div class="flex gap-2">
-                <div class="flex-1"><label class="block text-xs font-medium text-slate-500 mb-1">Edad mínima</label><input type="number" name="edadMin" th:value="${filtroEdadMin}" class="w-full rounded-xl border-slate-200 p-2.5 text-sm" min="0"></div>
-                <div class="flex-1"><label class="block text-xs font-medium text-slate-500 mb-1">Edad máxima</label><input type="number" name="edadMax" th:value="${filtroEdadMax}" class="w-full rounded-xl border-slate-200 p-2.5 text-sm" min="0"></div>
+                <div class="flex-1"><label class="block text-xs font-medium text-slate-500 mb-1"><i class="fas fa-calendar-alt mr-1"></i> Edad mín</label><input type="number" name="edadMin" th:value="${filtroEdadMin}" class="w-full rounded-xl border-slate-200 p-2.5 text-sm" min="0"></div>
+                <div class="flex-1"><label class="block text-xs font-medium text-slate-500 mb-1">Edad máx</label><input type="number" name="edadMax" th:value="${filtroEdadMax}" class="w-full rounded-xl border-slate-200 p-2.5 text-sm" min="0"></div>
             </div>
             <div class="flex gap-2">
-                <div class="flex-1"><label class="block text-xs font-medium text-slate-500 mb-1">Fecha desde</label><input type="date" name="desde" th:value="${filtroDesde}" class="w-full rounded-xl border-slate-200 p-2.5 text-sm"></div>
-                <div class="flex-1"><label class="block text-xs font-medium text-slate-500 mb-1">Fecha hasta</label><input type="date" name="hasta" th:value="${filtroHasta}" class="w-full rounded-xl border-slate-200 p-2.5 text-sm"></div>
+                <div class="flex-1"><label class="block text-xs font-medium text-slate-500 mb-1"><i class="fas fa-calendar-week mr-1"></i> Desde</label><input type="date" name="desde" th:value="${filtroDesde}" class="w-full rounded-xl border-slate-200 p-2.5 text-sm"></div>
+                <div class="flex-1"><label class="block text-xs font-medium text-slate-500 mb-1">Hasta</label><input type="date" name="hasta" th:value="${filtroHasta}" class="w-full rounded-xl border-slate-200 p-2.5 text-sm"></div>
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">Enfermedad de base</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1"><i class="fas fa-disease mr-1"></i> Enfermedad base</label>
                 <select name="conEnfermedadBase" class="w-full rounded-xl border-slate-200 p-2.5 text-sm bg-white">
                     <option value="">Todos</option>
                     <option value="true" th:selected="${filtroConEnfermedadBase != null and filtroConEnfermedadBase}">Con enfermedad base</option>
@@ -223,99 +294,110 @@
                 </select>
             </div>
         </form>
-        <div th:if="${hasActiveFilters}" class="mt-3 text-xs text-brand-600">Se está visualizando un subconjunto filtrado de datos.</div>
+        
+        <!-- Fila de exportación al inicio (justo debajo de filtros) -->
+        <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap justify-between items-center gap-3">
+            <div th:if="${hasActiveFilters}" class="text-xs text-brand-600 flex items-center gap-1">
+                <i class="fas fa-filter"></i> Se está visualizando un subconjunto filtrado de datos.
+            </div>
+            <div class="flex flex-wrap gap-3 ml-auto">
+                <span class="text-sm text-slate-500 flex items-center gap-1"><i class="fas fa-download"></i> Exportar reporte:</span>
+                <a th:href="@{/dashboard/export(format='pdf', q=${filtroQ}, institucionId=${filtroInstitucionId}, focoId=${filtroFocoId}, categoriaId=${filtroCategoriaId}, genero=${filtroGenero}, edadMin=${filtroEdadMin}, edadMax=${filtroEdadMax}, desde=${filtroDesde}, hasta=${filtroHasta}, conEnfermedadBase=${filtroConEnfermedadBase})}"
+                   class="ripple px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                <a th:href="@{/dashboard/export(format='excel', q=${filtroQ}, institucionId=${filtroInstitucionId}, focoId=${filtroFocoId}, categoriaId=${filtroCategoriaId}, genero=${filtroGenero}, edadMin=${filtroEdadMin}, edadMax=${filtroEdadMax}, desde=${filtroDesde}, hasta=${filtroHasta}, conEnfermedadBase=${filtroConEnfermedadBase})}"
+                   class="ripple px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Dashboard principal solo cuando hay datos -->
     <div th:if="${reportReady}" class="animate-fade-in space-y-6">
         
-        <!-- Tarjetas de métricas principales -->
+        <!-- Tarjetas de métricas principales con iconos y animación escalonada -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 flex items-center justify-between card-hover">
+            <div class="metric-card bg-white rounded-2xl shadow-card border border-slate-200 p-5 flex items-center justify-between card-hover animate-scale-in">
                 <div><p class="text-sm text-slate-500 font-medium">Total de registros</p><p class="text-3xl font-bold text-brand-700" th:text="${totalRegistros}">0</p></div>
-                <div class="h-12 w-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600"></div>
+                <div class="h-12 w-12 rounded-full bg-brand-100 flex items-center justify-center text-brand-600"><i class="fas fa-database text-xl"></i></div>
             </div>
-            <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 flex items-center justify-between card-hover">
+            <div class="metric-card bg-white rounded-2xl shadow-card border border-slate-200 p-5 flex items-center justify-between card-hover animate-scale-in">
                 <div><p class="text-sm text-slate-500 font-medium">Sonidos normales</p><p class="text-3xl font-bold text-emerald-600" th:text="${normalPct} + '%'">0%</p></div>
-                <div class="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"></div>
+                <div class="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><i class="fas fa-heartbeat text-xl"></i></div>
             </div>
-            <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 flex items-center justify-between card-hover">
+            <div class="metric-card bg-white rounded-2xl shadow-card border border-slate-200 p-5 flex items-center justify-between card-hover animate-scale-in">
                 <div><p class="text-sm text-slate-500 font-medium">Sonidos anormales</p><p class="text-3xl font-bold text-amber-600" th:text="${anormalPct} + '%'">0%</p></div>
-                <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"></div>
+                <div class="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><i class="fas fa-exclamation-triangle text-xl"></i></div>
             </div>
         </div>
 
-        <!-- Anomalía más frecuente -->
-        <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
-            <p class="text-xs text-slate-400 uppercase tracking-wider">Anomalía más frecuente</p>
-            <p class="text-xl font-bold text-slate-800" th:text="${anomaliaTop}">-</p>
+        <!-- Anomalía más frecuente con icono -->
+        <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover flex items-center justify-between">
+            <div>
+                <p class="text-xs text-slate-400 uppercase tracking-wider">Anomalía más frecuente</p>
+                <p class="text-xl font-bold text-slate-800" th:text="${anomaliaTop}">-</p>
+            </div>
+            <i class="fas fa-chart-simple text-3xl text-brand-300"></i>
         </div>
 
         <!-- Grid de gráficos (2 columnas responsivas) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Gráfico dona normal/anormal -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover transition-all">
-                <h3 class="font-bold text-slate-800 mb-1">Proporción normal vs anormal</h3>
+                <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-chart-pie text-brand-500"></i> Proporción normal vs anormal</h3>
                 <div class="h-56 relative"><canvas id="normalChart"></canvas></div>
                 <div class="flex justify-center gap-4 mt-3 text-sm" id="normalLegend"></div>
             </div>
             
             <!-- Gráfico anomalías (barras) -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
-                <h3 class="font-bold text-slate-800 mb-1">Registros por anomalía</h3>
+                <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-chart-bar text-brand-500"></i> Registros por anomalía</h3>
                 <div class="h-64"><canvas id="anomaliaChart"></canvas></div>
                 <div class="flex flex-wrap gap-3 mt-3 text-xs" id="anomaliaLegend"></div>
             </div>
             
             <!-- Gráfico focos -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
-                <h3 class="font-bold text-slate-800 mb-1">Registros por foco auscultatorio</h3>
+                <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-microphone-alt text-brand-500"></i> Registros por foco auscultatorio</h3>
                 <div class="h-64"><canvas id="focoChart"></canvas></div>
                 <div class="flex flex-wrap gap-3 mt-3 text-xs" id="focoLegend"></div>
             </div>
             
             <!-- Gráfico instituciones -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
-                <h3 class="font-bold text-slate-800 mb-1">Registros por institución</h3>
+                <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-building text-brand-500"></i> Registros por institución</h3>
                 <div class="h-64"><canvas id="institucionChart"></canvas></div>
                 <div class="flex flex-wrap gap-3 mt-3 text-xs" id="institucionLegend"></div>
             </div>
             
             <!-- Línea temporal -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover lg:col-span-2">
-                <h3 class="font-bold text-slate-800 mb-1">Evolución temporal de registros</h3>
+                <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-chart-line text-brand-500"></i> Evolución temporal de registros</h3>
                 <div class="h-72"><canvas id="timelineChart"></canvas></div>
             </div>
             
             <!-- Valvulopatías por edad -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
-                <h3 class="font-bold text-slate-800 mb-1">Valvulopatías por rango etario</h3>
+                <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-chart-line text-brand-500"></i> Valvulopatías por rango etario</h3>
                 <div class="h-64"><canvas id="valvAgeChart"></canvas></div>
                 <div class="flex flex-wrap gap-3 mt-3 text-xs" id="valvAgeLegend"></div>
             </div>
             
             <!-- Valvulopatías por género -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
-                <h3 class="font-bold text-slate-800 mb-1">Valvulopatías por género</h3>
+                <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-venus-mars text-brand-500"></i> Valvulopatías por género</h3>
                 <div class="h-64"><canvas id="valvGenderChart"></canvas></div>
                 <div class="flex justify-center gap-6 mt-3" id="valvGenderLegend"></div>
             </div>
             
             <!-- Valvulopatías y enfermedades base -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover lg:col-span-2">
-                <h3 class="font-bold text-slate-800 mb-1">Relación con enfermedades de base</h3>
+                <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-disease text-brand-500"></i> Relación con enfermedades de base</h3>
                 <div class="h-72 flex flex-wrap justify-center"><canvas id="valvDiseaseChart" style="max-height:220px"></canvas></div>
                 <div class="flex justify-center gap-6 mt-2" id="valvDiseaseLegend"></div>
             </div>
-        </div>
-
-        <!-- Botones de exportación (sin iconos) -->
-        <div class="flex flex-wrap gap-4 justify-end items-center bg-white/60 p-4 rounded-2xl backdrop-blur-sm">
-            <span class="text-sm text-slate-500">Exportar reporte:</span>
-            <a th:href="@{/dashboard/export(format='pdf', q=${filtroQ}, institucionId=${filtroInstitucionId}, focoId=${filtroFocoId}, categoriaId=${filtroCategoriaId}, genero=${filtroGenero}, edadMin=${filtroEdadMin}, edadMax=${filtroEdadMax}, desde=${filtroDesde}, hasta=${filtroHasta}, conEnfermedadBase=${filtroConEnfermedadBase})}"
-               class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-medium transition shadow-sm">PDF</a>
-            <a th:href="@{/dashboard/export(format='excel', q=${filtroQ}, institucionId=${filtroInstitucionId}, focoId=${filtroFocoId}, categoriaId=${filtroCategoriaId}, genero=${filtroGenero}, edadMin=${filtroEdadMin}, edadMax=${filtroEdadMax}, desde=${filtroDesde}, hasta=${filtroHasta}, conEnfermedadBase=${filtroConEnfermedadBase})}"
-               class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-medium transition shadow-sm">Excel</a>
         </div>
     </div>
 </div>
@@ -465,22 +547,33 @@
         });
     }
     
-    // Confirmación para exportación
+    // Función unificada para exportación con confirmación
+    function exportarReporte(format) {
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(url.search);
+        let exportUrl = `/dashboard/export?format=${format}`;
+        for (let [key, value] of params.entries()) {
+            if (value && key !== 'format') exportUrl += `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+        }
+        Swal.fire({
+            title: `Exportar a ${format.toUpperCase()}`,
+            text: 'Se generará el reporte con los filtros actuales. ¿Deseas continuar?',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#3266ad',
+            confirmButtonText: 'Exportar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) window.location.href = exportUrl;
+        });
+    }
+    
+    // Eventos para botones de exportación (reemplazar los antiguos)
     document.querySelectorAll('a[href*="/dashboard/export"]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            const format = btn.href.includes('pdf') ? 'PDF' : 'Excel';
-            Swal.fire({
-                title: `Exportar a ${format}`,
-                text: `Se generará el reporte con los filtros actuales. ¿Deseas continuar?`,
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonColor: '#3266ad',
-                confirmButtonText: 'Exportar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) window.location.href = btn.href;
-            });
+            const format = btn.href.includes('pdf') ? 'pdf' : 'excel';
+            exportarReporte(format);
         });
     });
 </script>

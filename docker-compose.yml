@@ -29,3 +29,4 @@ services:
 
     extra_hosts:
       - "desarrollo.compuconta.com:10.142.0.7"
+      - "host.docker.internal:host-gateway"
