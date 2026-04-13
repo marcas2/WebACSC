@@ -11,7 +11,7 @@ services:
 
     environment:
       SERVER_PORT: 3000
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5520/dashboard_db}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://10.142.0.7:5520/dashboard_db}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: User*2018
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
