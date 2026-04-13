@@ -1,9 +1,14 @@
+version: "3.9"
+
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: webacsc-app
+
+    restart: unless-stopped
+
     environment:
       SERVER_PORT: 3000
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://host.docker.internal:5520/dashboard_db}
@@ -15,7 +20,12 @@ services:
       APP_JWT_EXPIRATION_MS: ${APP_JWT_EXPIRATION_MS:-86400000}
       APP_APK_RESOURCE_PATH: ${APP_APK_RESOURCE_PATH:-file:/app/apk/acsc.apk}
       APP_APK_DOWNLOAD_NAME: ${APP_APK_DOWNLOAD_NAME:-acsc.apk}
+
     ports:
       - "3000:3000"
+
     volumes:
       - ./apk:/app/apk:ro
+
+    extra_hosts:
+      - "desarrollo.compuconta.com:10.142.0.7"
