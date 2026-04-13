@@ -4,50 +4,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
     <title>Dashboard Clínico · Sonidos Cardíacos</title>
-    
-    <!-- Tailwind CSS + configuración -->
+
+    <!-- Tailwind CSS + Configuración unificada -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SweetAlert2 para notificaciones elegantes -->
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Chart.js para gráficos profesionales -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <!-- Font Awesome 6 (iconos modernos, sin emojis) -->
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-    
+    <!-- Google Fonts: Plus Jakarta Sans (coherente con el otro panel) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'ui-sans-serif', 'system-ui']
+                        sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui']
                     },
                     colors: {
                         brand: {
-                            50: '#f0f4fa',
-                            100: '#e0e8f3',
-                            200: '#c1d0e7',
-                            300: '#9bb7d8',
-                            400: '#6f97c4',
-                            500: '#4a7ed4',
-                            600: '#3a62aa',
-                            700: '#2f4f89',
-                            800: '#263f6e',
-                            900: '#1e3154'
+                            50: '#f4f8fb',
+                            100: '#e8f0f7',
+                            200: '#d4e4f0',
+                            300: '#aecedf',
+                            400: '#7faec8',
+                            500: '#568eaf',
+                            600: '#3d7293',
+                            700: '#2f5b77',
+                            800: '#284b63',
+                            900: '#243f53'
                         }
                     },
                     boxShadow: {
-                        'card': '0 8px 20px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.05)',
-                        'soft': '0 12px 28px -8px rgba(0,0,0,0.08)',
-                        'hover': '0 20px 30px -12px rgba(0, 0, 0, 0.12)'
+                        soft: '0 18px 45px rgba(36, 63, 83, 0.08)',
+                        card: '0 12px 30px rgba(36, 63, 83, 0.07)',
+                        hover: '0 20px 30px -12px rgba(0, 0, 0, 0.12)'
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.4s ease-out',
                         'slide-up': 'slideUp 0.3s ease-out',
-                        'scale-in': 'scaleIn 0.2s ease-out',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                        'scale-in': 'scaleIn 0.2s ease-out'
                     },
                     keyframes: {
                         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
@@ -58,40 +60,36 @@
             }
         }
     </script>
-    
+
     <style>
+        html { scroll-behavior: smooth; }
         body {
-            background: linear-gradient(135deg, #f5f7fc 0%, #edf2f9 100%);
+            background: radial-gradient(circle at top left, rgba(212, 228, 240, 0.4) 0%, #ffffff 70%);
+        }
+        *:focus-visible {
+            outline: 2px solid #3d7293;
+            outline-offset: 2px;
+            border-radius: 8px;
         }
         .card-hover {
             transition: all 0.25s ease;
         }
         .card-hover:hover {
             transform: translateY(-3px);
-            box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.08);
         }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #e2e8f0;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 10px;
-        }
-        .chart-container {
-            transition: all 0.2s;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #eef2f6; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #7faec8; border-radius: 10px; }
+
+        /* Estilos adicionales para inputs y selects */
         select, input {
             transition: all 0.15s ease;
         }
         select:focus, input:focus {
             outline: none;
-            border-color: #4a7ed4;
-            box-shadow: 0 0 0 3px rgba(74,126,212,0.1);
+            border-color: #568eaf;
+            box-shadow: 0 0 0 3px rgba(86, 142, 175, 0.1);
         }
         .nav-link {
             transition: all 0.2s;
@@ -103,13 +101,10 @@
         }
         .nav-link.active {
             background-color: #eef2ff;
-            border-color: #4a7ed4;
-            color: #3a62aa;
+            border-color: #568eaf;
+            color: #3d7293;
         }
-        .dropdown-modules {
-            transition: opacity 0.2s, transform 0.2s;
-        }
-        /* Efecto ripple para botones */
+        /* Efecto ripple */
         .ripple {
             position: relative;
             overflow: hidden;
@@ -131,7 +126,7 @@
             height: 200px;
             opacity: 0;
         }
-        /* Animación escalonada para tarjetas */
+        /* Animación escalonada tarjetas */
         .metric-card:nth-child(1) { animation-delay: 0s; }
         .metric-card:nth-child(2) { animation-delay: 0.1s; }
         .metric-card:nth-child(3) { animation-delay: 0.2s; }
@@ -139,19 +134,16 @@
 </head>
 <body class="font-sans antialiased">
 
-<!-- Header superior con iconos -->
+<!-- Header con iconos y estilos unificados -->
 <div class="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-20 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <!-- Icono del nav (estetoscopio/corazón) -->
                 <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-md">
                     <i class="fas fa-stethoscope text-white text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-bold text-brand-800 tracking-tight flex items-center gap-2">
-                        Dashboard Clínico
-                    </h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-brand-800 tracking-tight">Dashboard Clínico</h1>
                     <p class="text-sm text-slate-500 mt-0.5">
                         <i class="fas fa-user-md mr-1 text-brand-400 text-xs"></i>
                         Bienvenido, <strong class="text-slate-700" th:text="${username}"></strong> · 
@@ -174,10 +166,9 @@
     </div>
 </div>
 
-<!-- Barra de navegación para módulos de gestión (con iconos y mejor organización) -->
+<!-- Barra de navegación para módulos de gestión -->
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" sec:authorize="hasAnyAuthority('ROLE_SUPER_USER','ROLE_ADMIN')">
     <div class="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-2">
-        <!-- Módulos principales con iconos -->
         <a sec:authorize="hasAuthority('ROLE_SUPER_USER')" th:href="@{/dashboard/users}" 
            class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition flex items-center gap-2">
             <i class="fas fa-users text-brand-500"></i> Usuarios
@@ -198,8 +189,6 @@
            class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition flex items-center gap-2">
             <i class="fas fa-heartbeat text-brand-500"></i> Enfermedades base
         </a>
-        
-        <!-- Separador y acceso rápido a reportes (mejora de gestión) -->
         <div class="h-6 w-px bg-slate-300 mx-1 hidden sm:block"></div>
         <div class="relative group">
             <button class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition flex items-center gap-2">
@@ -220,7 +209,7 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <!-- Mensajes informativos / errores -->
+    <!-- Mensajes informativos -->
     <div th:if="${infoMessage}" class="animate-fade-in bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg shadow-sm flex items-center gap-2">
         <i class="fas fa-info-circle"></i> <span th:text="${infoMessage}"></span>
     </div>
@@ -228,7 +217,7 @@
         <i class="fas fa-exclamation-triangle"></i> <span th:text="${errorMessage}"></span>
     </div>
 
-    <!-- Panel de filtros avanzados + EXPORTACIÓN AL INICIO -->
+    <!-- Panel de filtros avanzados + exportación al inicio -->
     <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 transition-all duration-200 card-hover animate-slide-up">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
@@ -243,7 +232,6 @@
                 </a>
             </div>
         </div>
-        
         <form id="filterForm" method="get" th:action="@{/dashboard}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
                 <label class="block text-xs font-medium text-slate-500 mb-1"><i class="fas fa-search mr-1"></i> Diagnóstico</label>
@@ -294,8 +282,7 @@
                 </select>
             </div>
         </form>
-        
-        <!-- Fila de exportación al inicio (justo debajo de filtros) -->
+        <!-- Exportación al inicio justo debajo -->
         <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap justify-between items-center gap-3">
             <div th:if="${hasActiveFilters}" class="text-xs text-brand-600 flex items-center gap-1">
                 <i class="fas fa-filter"></i> Se está visualizando un subconjunto filtrado de datos.
@@ -314,10 +301,9 @@
         </div>
     </div>
 
-    <!-- Dashboard principal solo cuando hay datos -->
+    <!-- Dashboard principal -->
     <div th:if="${reportReady}" class="animate-fade-in space-y-6">
-        
-        <!-- Tarjetas de métricas principales con iconos y animación escalonada -->
+        <!-- Tarjetas de métricas -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <div class="metric-card bg-white rounded-2xl shadow-card border border-slate-200 p-5 flex items-center justify-between card-hover animate-scale-in">
                 <div><p class="text-sm text-slate-500 font-medium">Total de registros</p><p class="text-3xl font-bold text-brand-700" th:text="${totalRegistros}">0</p></div>
@@ -333,7 +319,7 @@
             </div>
         </div>
 
-        <!-- Anomalía más frecuente con icono -->
+        <!-- Anomalía más frecuente -->
         <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover flex items-center justify-between">
             <div>
                 <p class="text-xs text-slate-400 uppercase tracking-wider">Anomalía más frecuente</p>
@@ -342,57 +328,42 @@
             <i class="fas fa-chart-simple text-3xl text-brand-300"></i>
         </div>
 
-        <!-- Grid de gráficos (2 columnas responsivas) -->
+        <!-- Gráficos -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Gráfico dona normal/anormal -->
-            <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover transition-all">
+            <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
                 <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-chart-pie text-brand-500"></i> Proporción normal vs anormal</h3>
                 <div class="h-56 relative"><canvas id="normalChart"></canvas></div>
                 <div class="flex justify-center gap-4 mt-3 text-sm" id="normalLegend"></div>
             </div>
-            
-            <!-- Gráfico anomalías (barras) -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
                 <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-chart-bar text-brand-500"></i> Registros por anomalía</h3>
                 <div class="h-64"><canvas id="anomaliaChart"></canvas></div>
                 <div class="flex flex-wrap gap-3 mt-3 text-xs" id="anomaliaLegend"></div>
             </div>
-            
-            <!-- Gráfico focos -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
                 <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-microphone-alt text-brand-500"></i> Registros por foco auscultatorio</h3>
                 <div class="h-64"><canvas id="focoChart"></canvas></div>
                 <div class="flex flex-wrap gap-3 mt-3 text-xs" id="focoLegend"></div>
             </div>
-            
-            <!-- Gráfico instituciones -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
                 <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-building text-brand-500"></i> Registros por institución</h3>
                 <div class="h-64"><canvas id="institucionChart"></canvas></div>
                 <div class="flex flex-wrap gap-3 mt-3 text-xs" id="institucionLegend"></div>
             </div>
-            
-            <!-- Línea temporal -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover lg:col-span-2">
                 <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-chart-line text-brand-500"></i> Evolución temporal de registros</h3>
                 <div class="h-72"><canvas id="timelineChart"></canvas></div>
             </div>
-            
-            <!-- Valvulopatías por edad -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
                 <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-chart-line text-brand-500"></i> Valvulopatías por rango etario</h3>
                 <div class="h-64"><canvas id="valvAgeChart"></canvas></div>
                 <div class="flex flex-wrap gap-3 mt-3 text-xs" id="valvAgeLegend"></div>
             </div>
-            
-            <!-- Valvulopatías por género -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover">
                 <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-venus-mars text-brand-500"></i> Valvulopatías por género</h3>
                 <div class="h-64"><canvas id="valvGenderChart"></canvas></div>
                 <div class="flex justify-center gap-6 mt-3" id="valvGenderLegend"></div>
             </div>
-            
-            <!-- Valvulopatías y enfermedades base -->
             <div class="bg-white rounded-2xl shadow-card border border-slate-200 p-5 card-hover lg:col-span-2">
                 <h3 class="font-bold text-slate-800 mb-1 flex items-center gap-2"><i class="fas fa-disease text-brand-500"></i> Relación con enfermedades de base</h3>
                 <div class="h-72 flex flex-wrap justify-center"><canvas id="valvDiseaseChart" style="max-height:220px"></canvas></div>
@@ -403,7 +374,7 @@
 </div>
 
 <script th:inline="javascript">
-    /* ----------------------------- DATOS DEL BACKEND ----------------------------- */
+    // Datos desde backend
     const normalLabels      = /*[[${normalStatusLabels}]]*/ [];
     const normalData        = /*[[${normalStatusData}]]*/ [];
     const anomaliaLabels    = /*[[${anomaliaLabels}]]*/ [];
@@ -421,14 +392,13 @@
     const valvDiseaseLabels = /*[[${valvDiseaseLabels}]]*/ [];
     const valvDiseaseData   = /*[[${valvDiseaseData}]]*/ [];
 
-    // Paletas de colores profesionales
     const PALETTES = {
         normal:      ['#2D7A55', '#E2734A'],
-        anomalia:    ['#4A7ED4', '#6AACDC', '#85C9D6', '#A5DEAF', '#5B6FD4', '#CC6B8E', '#D4A35B', '#7CC4A8', '#AA83D4', '#7B9ACC', '#C47A20'],
-        foco:        ['#4A7ED4', '#6AACDC', '#85C9D6', '#A5DEAF'],
+        anomalia:    ['#568eaf', '#7faec8', '#aecedf', '#A5DEAF', '#5B6FD4', '#CC6B8E', '#D4A35B', '#7CC4A8', '#AA83D4', '#7B9ACC', '#C47A20'],
+        foco:        ['#568eaf', '#7faec8', '#aecedf', '#A5DEAF'],
         institucion: ['#5B6FD4', '#CC6B8E', '#7CC4A8', '#D4A35B', '#A5DEAF', '#85C9D6'],
-        timeline:    '#3266ad',
-        valvAge:     ['#4A7ED4', '#6AACDC', '#85C9D6', '#A5DEAF'],
+        timeline:    '#3d7293',
+        valvAge:     ['#568eaf', '#7faec8', '#aecedf', '#A5DEAF'],
         valvGender:  ['#5B6FD4', '#CC6B8E'],
         valvDisease: ['#E2734A', '#7CC4A8']
     };
@@ -448,7 +418,6 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-        // 1. Gráfico Normal/Anormal
         const normalCtx = document.getElementById('normalChart')?.getContext('2d');
         if (normalCtx && normalLabels.length) {
             createChart(normalCtx, 'doughnut', {
@@ -457,8 +426,6 @@
             }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed} registros (${Math.round(ctx.parsed / normalData.reduce((a,b)=>a+b,0)*100)}%)` } } } });
             buildLegend('normalLegend', normalLabels, PALETTES.normal, normalData);
         }
-
-        // 2. Anomalías
         const anomCtx = document.getElementById('anomaliaChart')?.getContext('2d');
         if (anomCtx && anomaliaLabels.length) {
             createChart(anomCtx, 'bar', {
@@ -467,8 +434,6 @@
             }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} registros` } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { grid: { color: '#e2e8f0' }, ticks: { stepSize: 1 } } } });
             buildLegend('anomaliaLegend', anomaliaLabels, PALETTES.anomalia, anomaliaData);
         }
-
-        // 3. Focos
         const focoCtx = document.getElementById('focoChart')?.getContext('2d');
         if (focoCtx && focoLabels.length) {
             createChart(focoCtx, 'bar', {
@@ -477,8 +442,6 @@
             }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} registros` } } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#e2e8f0' } } } });
             buildLegend('focoLegend', focoLabels, PALETTES.foco, focoData);
         }
-
-        // 4. Instituciones
         const instCtx = document.getElementById('institucionChart')?.getContext('2d');
         if (instCtx && institucionLabels.length) {
             createChart(instCtx, 'bar', {
@@ -487,17 +450,13 @@
             }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} registros` } } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#e2e8f0' } } } });
             buildLegend('institucionLegend', institucionLabels, PALETTES.institucion, institucionData);
         }
-
-        // 5. Línea temporal
         const timeCtx = document.getElementById('timelineChart')?.getContext('2d');
         if (timeCtx && timelineLabels.length) {
             createChart(timeCtx, 'line', {
                 labels: timelineLabels,
-                datasets: [{ label: 'Registros', data: timelineData, borderColor: PALETTES.timeline, backgroundColor: 'rgba(50,102,173,0.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: PALETTES.timeline, pointHoverRadius: 6 }]
+                datasets: [{ label: 'Registros', data: timelineData, borderColor: PALETTES.timeline, backgroundColor: 'rgba(61,114,147,0.1)', fill: true, tension: 0.3, pointRadius: 4, pointBackgroundColor: PALETTES.timeline, pointHoverRadius: 6 }]
             }, { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} registros` } } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#e2e8f0' } } } });
         }
-
-        // 6. Valvulopatías por edad
         const ageCtx = document.getElementById('valvAgeChart')?.getContext('2d');
         if (ageCtx && valvAgeLabels.length) {
             createChart(ageCtx, 'bar', {
@@ -506,8 +465,6 @@
             }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} pacientes` } } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#e2e8f0' } } } });
             buildLegend('valvAgeLegend', valvAgeLabels, PALETTES.valvAge, valvAgeData);
         }
-
-        // 7. Género
         const genderCtx = document.getElementById('valvGenderChart')?.getContext('2d');
         if (genderCtx && valvGenderLabels.length) {
             createChart(genderCtx, 'doughnut', {
@@ -516,8 +473,6 @@
             }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed} pacientes (${Math.round(ctx.parsed / valvGenderData.reduce((a,b)=>a+b,0)*100)}%)` } } } });
             buildLegend('valvGenderLegend', valvGenderLabels, PALETTES.valvGender, valvGenderData);
         }
-
-        // 8. Enfermedades base
         const diseaseCtx = document.getElementById('valvDiseaseChart')?.getContext('2d');
         if (diseaseCtx && valvDiseaseLabels.length) {
             createChart(diseaseCtx, 'doughnut', {
@@ -528,7 +483,6 @@
         }
     });
 
-    // SweetAlert para confirmación de descarga APK
     function confirmarDescargaAPK(event) {
         event.preventDefault();
         Swal.fire({
@@ -536,18 +490,15 @@
             text: '¿Deseas descargar el archivo APK de la aplicación de adquisición de sonidos cardíacos?',
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#2d7a55',
+            confirmButtonColor: '#3d7293',
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'Sí, descargar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = '/dashboard/apk/download';
-            }
+            if (result.isConfirmed) window.location.href = '/dashboard/apk/download';
         });
     }
-    
-    // Función unificada para exportación con confirmación
+
     function exportarReporte(format) {
         const url = new URL(window.location.href);
         const params = new URLSearchParams(url.search);
@@ -560,15 +511,14 @@
             text: 'Se generará el reporte con los filtros actuales. ¿Deseas continuar?',
             icon: 'info',
             showCancelButton: true,
-            confirmButtonColor: '#3266ad',
+            confirmButtonColor: '#3d7293',
             confirmButtonText: 'Exportar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) window.location.href = exportUrl;
         });
     }
-    
-    // Eventos para botones de exportación (reemplazar los antiguos)
+
     document.querySelectorAll('a[href*="/dashboard/export"]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -577,6 +527,5 @@
         });
     });
 </script>
-
 </body>
 </html>
