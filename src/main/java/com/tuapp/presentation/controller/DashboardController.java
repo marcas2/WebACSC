@@ -1,6 +1,7 @@
 package com.tuapp.presentation.controller;
 
 import com.tuapp.application.service.DashboardDiagnosticService;
+import com.tuapp.application.service.DashboardQueryFilters;
 import com.tuapp.util.ExcelExportUtil;
 import com.tuapp.util.PdfExportUtil;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,23 +34,158 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard")
+    public String dashboardView(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long institucionId,
+            @RequestParam(required = false) Long focoId,
+            @RequestParam(required = false) Long categoriaId,
+            @RequestParam(required = false) String genero,
+            @RequestParam(required = false) Integer edadMin,
+            @RequestParam(required = false) Integer edadMax,
+            @RequestParam(required = false) LocalDate desde,
+            @RequestParam(required = false) LocalDate hasta,
+            @RequestParam(required = false) Boolean conEnfermedadBase,
+            Authentication authentication,
+            Model model) {
+
+        DashboardQueryFilters filters = new DashboardQueryFilters(
+                q,
+                institucionId,
+                focoId,
+                categoriaId,
+                genero,
+                edadMin,
+                edadMax,
+                desde,
+                hasta,
+                conEnfermedadBase);
+
+        return renderDashboard(authentication, model, filters);
+    }
+
     public String dashboard(Authentication authentication, Model model) {
+        return renderDashboard(authentication, model, DashboardQueryFilters.empty());
+    }
+
+    @GetMapping("/dashboard/export")
+    public ResponseEntity<byte[]> exportWithFilters(
+            @RequestParam String format,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long institucionId,
+            @RequestParam(required = false) Long focoId,
+            @RequestParam(required = false) Long categoriaId,
+            @RequestParam(required = false) String genero,
+            @RequestParam(required = false) Integer edadMin,
+            @RequestParam(required = false) Integer edadMax,
+            @RequestParam(required = false) LocalDate desde,
+            @RequestParam(required = false) LocalDate hasta,
+            @RequestParam(required = false) Boolean conEnfermedadBase,
+            Authentication authentication) {
+
+        DashboardQueryFilters filters = new DashboardQueryFilters(
+                q,
+                institucionId,
+                focoId,
+                categoriaId,
+                genero,
+                edadMin,
+                edadMax,
+                desde,
+                hasta,
+                conEnfermedadBase);
+
+        return exportInternal(format, filters);
+    }
+
+    public ResponseEntity<byte[]> export(
+            @RequestParam String format,
+            Authentication authentication) {
+        return exportInternal(format, DashboardQueryFilters.empty());
+    }
+
+    private String renderDashboard(Authentication authentication, Model model, DashboardQueryFilters filters) {
         model.addAttribute("username", resolveUsername(authentication));
         model.addAttribute("role", resolveRole(authentication));
         try {
+            bindFilterOptions(model, filters);
+        } catch (Exception ex) {
+            log.error("Error cargando opciones de filtros del dashboard", ex);
+            model.addAttribute("institucionOptions", java.util.Collections.emptyMap());
+            model.addAttribute("focoOptions", java.util.Collections.emptyMap());
+            model.addAttribute("categoriaOptions", java.util.Collections.emptyMap());
+            model.addAttribute("generoOptions", java.util.Collections.emptyList());
+            model.addAttribute("filtroQ", filters.getSearchText());
+            model.addAttribute("filtroInstitucionId", filters.getInstitucionId());
+            model.addAttribute("filtroFocoId", filters.getFocoId());
+            model.addAttribute("filtroCategoriaId", filters.getCategoriaId());
+            model.addAttribute("filtroGenero", filters.getGenero());
+            model.addAttribute("filtroEdadMin", filters.getEdadMin());
+            model.addAttribute("filtroEdadMax", filters.getEdadMax());
+            model.addAttribute("filtroDesde", filters.getDesde());
+            model.addAttribute("filtroHasta", filters.getHasta());
+            model.addAttribute("filtroConEnfermedadBase", filters.getConEnfermedadBase());
+            model.addAttribute("hasActiveFilters", filters.hasAnyFilter());
+        }
+        try {
+            if (filters == null || !filters.hasAnyFilter()) {
+                return renderLegacyDashboard(model);
+            }
 
+            DashboardDiagnosticService.DashboardReportData reportData =
+                    dashboardDiagnosticService.getDashboardReportData(filters);
+
+            if (reportData.isEmpty()) {
+                model.addAttribute("infoMessage",
+                        "No hay resultados para los filtros seleccionados.");
+                populateEmptyDashboardModel(model);
+                return "dashboard";
+            }
+
+            Map<String, Long> normalStatusMap = ensureLabels(
+                    reportData.getNormalStatusMap(),
+                    new String[]{"NORMAL", "ANORMAL"});
+
+            populateDashboardModel(
+                    model,
+                    reportData.getTotalRegistros(),
+                    normalStatusMap,
+                    reportData.getCategoriaMap(),
+                    reportData.getFocoMap(),
+                    reportData.getInstitucionMap(),
+                    reportData.getMonthMap(),
+                    reportData.getValvulopathyAgeMap(),
+                    reportData.getValvulopathyGenderMap(),
+                    reportData.getValvulopathyDiseaseMap());
+
+            model.addAttribute("reportReady", true);
+            return "dashboard";
+        } catch (Exception ex) {
+            log.error("Error generando dashboard", ex);
+            try {
+                model.addAttribute("errorMessage",
+                        "Se presentó un inconveniente al aplicar filtros. Se muestra la vista general del dashboard.");
+                return renderLegacyDashboard(model);
+            } catch (Exception legacyEx) {
+                log.error("Error generando dashboard en modo de respaldo", legacyEx);
+                model.addAttribute("errorMessage",
+                        "Ocurrió un error al generar el dashboard. Revisa los datos y vuelve a intentar.");
+                populateEmptyDashboardModel(model);
+                return "dashboard";
+            }
+        }
+    }
+
+    private String renderLegacyDashboard(Model model) {
         if (!dashboardDiagnosticService.hasData()) {
             model.addAttribute("infoMessage",
-                "No se encontraron registros de sonidos cardíacos en el sistema.");
+                    "No se encontraron registros de sonidos cardíacos en el sistema.");
             populateEmptyDashboardModel(model);
             return "dashboard";
         }
-            model.addAttribute("username", resolveUsername(authentication));
-            model.addAttribute("role", resolveRole(authentication));
 
         Map<String, Long> normalStatusMap = ensureLabels(
-            dashboardDiagnosticService.getByNormalStatus(),
-            new String[]{"NORMAL", "ANORMAL"});
+                dashboardDiagnosticService.getByNormalStatus(),
+                new String[]{"NORMAL", "ANORMAL"});
         Map<String, Long> categoriaMap = dashboardDiagnosticService.getByCategoriaAnomalia();
         Map<String, Long> focoMap = dashboardDiagnosticService.getByFoco();
         Map<String, Long> institucionMap = dashboardDiagnosticService.getByInstitucion();
@@ -58,14 +195,132 @@ public class DashboardController {
         Map<String, Long> valvulopathyDiseaseMap = dashboardDiagnosticService.getValvulopathiesByUnderlyingDiseases();
 
         if (!dashboardDiagnosticService.isDataComplete(
-            normalStatusMap, categoriaMap, focoMap, institucionMap, monthMap,
-            valvulopathyAgeMap, valvulopathyGenderMap, valvulopathyDiseaseMap)) {
+                normalStatusMap,
+                categoriaMap,
+                focoMap,
+                institucionMap,
+                monthMap,
+                valvulopathyAgeMap,
+                valvulopathyGenderMap,
+                valvulopathyDiseaseMap)) {
             model.addAttribute("errorMessage",
-                "Los datos están incompletos para generar el reporte estadístico solicitado.");
+                    "Los datos están incompletos para generar el reporte estadístico solicitado.");
             populateEmptyDashboardModel(model);
             return "dashboard";
         }
 
+        long totalRegistros = dashboardDiagnosticService.getTotalRegistros();
+        populateDashboardModel(model,
+                totalRegistros,
+                normalStatusMap,
+                categoriaMap,
+                focoMap,
+                institucionMap,
+                monthMap,
+                valvulopathyAgeMap,
+                valvulopathyGenderMap,
+                valvulopathyDiseaseMap);
+        model.addAttribute("reportReady", true);
+        return "dashboard";
+    }
+
+    private ResponseEntity<byte[]> exportInternal(String format, DashboardQueryFilters filters) {
+        try {
+            Map<String, Long> normalStatusMap;
+            Map<String, Long> categoriaMap;
+            Map<String, Long> focoMap;
+            Map<String, Long> institucionMap;
+            Map<String, Long> monthMap;
+            Map<String, Long> valvulopathyAgeMap;
+            Map<String, Long> valvulopathyGenderMap;
+            Map<String, Long> valvulopathyDiseaseMap;
+            long totalRegistros;
+
+            if (filters == null || !filters.hasAnyFilter()) {
+                normalStatusMap = ensureLabels(
+                        dashboardDiagnosticService.getByNormalStatus(),
+                        new String[]{"NORMAL", "ANORMAL"});
+                categoriaMap = dashboardDiagnosticService.getByCategoriaAnomalia();
+                focoMap = dashboardDiagnosticService.getByFoco();
+                institucionMap = dashboardDiagnosticService.getByInstitucion();
+                monthMap = dashboardDiagnosticService.getByMonth();
+                valvulopathyAgeMap = dashboardDiagnosticService.getValvulopathiesByAgeRange();
+                valvulopathyGenderMap = dashboardDiagnosticService.getValvulopathiesByGender();
+                valvulopathyDiseaseMap = dashboardDiagnosticService.getValvulopathiesByUnderlyingDiseases();
+                totalRegistros = dashboardDiagnosticService.getTotalRegistros();
+            } else {
+                DashboardDiagnosticService.DashboardReportData reportData =
+                        dashboardDiagnosticService.getDashboardReportData(filters);
+                normalStatusMap = ensureLabels(reportData.getNormalStatusMap(), new String[]{"NORMAL", "ANORMAL"});
+                categoriaMap = reportData.getCategoriaMap();
+                focoMap = reportData.getFocoMap();
+                institucionMap = reportData.getInstitucionMap();
+                monthMap = reportData.getMonthMap();
+                valvulopathyAgeMap = reportData.getValvulopathyAgeMap();
+                valvulopathyGenderMap = reportData.getValvulopathyGenderMap();
+                valvulopathyDiseaseMap = reportData.getValvulopathyDiseaseMap();
+                totalRegistros = reportData.getTotalRegistros();
+            }
+
+            byte[] file;
+            String filename;
+            String contentType;
+
+            if ("excel".equalsIgnoreCase(format)) {
+                file = ExcelExportUtil.toExcel(totalRegistros, normalStatusMap, categoriaMap, focoMap, institucionMap,
+                        monthMap, valvulopathyAgeMap, valvulopathyGenderMap, valvulopathyDiseaseMap);
+                filename = "reporte_sonidos_cardiacos.xlsx";
+                contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            } else {
+                file = PdfExportUtil.toPdf(totalRegistros, normalStatusMap, categoriaMap, focoMap, institucionMap,
+                        monthMap, valvulopathyAgeMap, valvulopathyGenderMap, valvulopathyDiseaseMap);
+                filename = "reporte_sonidos_cardiacos.pdf";
+                contentType = MediaType.APPLICATION_PDF_VALUE;
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(file);
+        } catch (Exception ex) {
+            log.error("Error exportando dashboard", ex);
+            return ResponseEntity.internalServerError()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body("No se pudo generar el archivo de exportación.".getBytes());
+        }
+    }
+
+    private void bindFilterOptions(Model model, DashboardQueryFilters filters) {
+        DashboardDiagnosticService.DashboardFilterOptions options = dashboardDiagnosticService.getFilterOptions();
+        model.addAttribute("institucionOptions", options.getInstituciones());
+        model.addAttribute("focoOptions", options.getFocos());
+        model.addAttribute("categoriaOptions", options.getCategorias());
+        model.addAttribute("generoOptions", options.getGeneros());
+
+        model.addAttribute("filtroQ", filters.getSearchText());
+        model.addAttribute("filtroInstitucionId", filters.getInstitucionId());
+        model.addAttribute("filtroFocoId", filters.getFocoId());
+        model.addAttribute("filtroCategoriaId", filters.getCategoriaId());
+        model.addAttribute("filtroGenero", filters.getGenero());
+        model.addAttribute("filtroEdadMin", filters.getEdadMin());
+        model.addAttribute("filtroEdadMax", filters.getEdadMax());
+        model.addAttribute("filtroDesde", filters.getDesde());
+        model.addAttribute("filtroHasta", filters.getHasta());
+        model.addAttribute("filtroConEnfermedadBase", filters.getConEnfermedadBase());
+        model.addAttribute("hasActiveFilters", filters.hasAnyFilter());
+    }
+
+    private void populateDashboardModel(Model model,
+                                        long totalRegistros,
+                                        Map<String, Long> normalStatusMap,
+                                        Map<String, Long> categoriaMap,
+                                        Map<String, Long> focoMap,
+                                        Map<String, Long> institucionMap,
+                                        Map<String, Long> monthMap,
+                                        Map<String, Long> valvulopathyAgeMap,
+                                        Map<String, Long> valvulopathyGenderMap,
+                                        Map<String, Long> valvulopathyDiseaseMap) {
         model.addAttribute("normalStatusLabels", new ArrayList<>(normalStatusMap.keySet()));
         model.addAttribute("normalStatusData", new ArrayList<>(normalStatusMap.values()));
         model.addAttribute("anomaliaLabels", new ArrayList<>(categoriaMap.keySet()));
@@ -83,84 +338,24 @@ public class DashboardController {
         model.addAttribute("valvDiseaseLabels", new ArrayList<>(valvulopathyDiseaseMap.keySet()));
         model.addAttribute("valvDiseaseData", new ArrayList<>(valvulopathyDiseaseMap.values()));
 
-        long totalRegistros = dashboardDiagnosticService.getTotalRegistros();
         model.addAttribute("totalRegistros", totalRegistros);
 
         long normales = normalStatusMap.getOrDefault("NORMAL", 0L);
         long anormales = normalStatusMap.getOrDefault("ANORMAL", 0L);
         int anormalPct = totalRegistros > 0
-            ? (int) Math.round(anormales * 100.0 / totalRegistros)
-            : 0;
+                ? (int) Math.round(anormales * 100.0 / totalRegistros)
+                : 0;
 
         String anomaliaTop = categoriaMap.entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
-            .orElse("Sin datos");
+                .orElse("Sin datos");
 
         model.addAttribute("normalPct", totalRegistros > 0
-            ? (int) Math.round(normales * 100.0 / totalRegistros)
-            : 0);
+                ? (int) Math.round(normales * 100.0 / totalRegistros)
+                : 0);
         model.addAttribute("anormalPct", anormalPct);
         model.addAttribute("anomaliaTop", anomaliaTop);
-
-        model.addAttribute("reportReady", true);
-        return "dashboard";
-        } catch (Exception ex) {
-            log.error("Error generando dashboard", ex);
-            model.addAttribute("errorMessage",
-                    "Ocurrió un error al generar el dashboard. Revisa los datos y vuelve a intentar.");
-            model.addAttribute("username", resolveUsername(authentication));
-            model.addAttribute("role", resolveRole(authentication));
-            populateEmptyDashboardModel(model);
-            return "dashboard";
-        }
-    }
-
-    @GetMapping("/dashboard/export")
-    public ResponseEntity<byte[]> export(
-            @RequestParam String format,
-            Authentication authentication) {
-        try {
-
-        Map<String, Long> normalStatusMap = ensureLabels(
-                dashboardDiagnosticService.getByNormalStatus(),
-                new String[]{"NORMAL", "ANORMAL"});
-        Map<String, Long> categoriaMap = dashboardDiagnosticService.getByCategoriaAnomalia();
-        Map<String, Long> focoMap = dashboardDiagnosticService.getByFoco();
-        Map<String, Long> institucionMap = dashboardDiagnosticService.getByInstitucion();
-        Map<String, Long> monthMap = dashboardDiagnosticService.getByMonth();
-        Map<String, Long> valvulopathyAgeMap = dashboardDiagnosticService.getValvulopathiesByAgeRange();
-        Map<String, Long> valvulopathyGenderMap = dashboardDiagnosticService.getValvulopathiesByGender();
-        Map<String, Long> valvulopathyDiseaseMap = dashboardDiagnosticService.getValvulopathiesByUnderlyingDiseases();
-        long totalRegistros = dashboardDiagnosticService.getTotalRegistros();
-
-        byte[] file;
-        String filename;
-        String contentType;
-
-        if ("excel".equalsIgnoreCase(format)) {
-                file        = ExcelExportUtil.toExcel(totalRegistros, normalStatusMap, categoriaMap, focoMap, institucionMap,
-                    monthMap, valvulopathyAgeMap, valvulopathyGenderMap, valvulopathyDiseaseMap);
-            filename    = "reporte_sonidos_cardiacos.xlsx";
-            contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        } else {
-                file        = PdfExportUtil.toPdf(totalRegistros, normalStatusMap, categoriaMap, focoMap, institucionMap,
-                    monthMap, valvulopathyAgeMap, valvulopathyGenderMap, valvulopathyDiseaseMap);
-            filename    = "reporte_sonidos_cardiacos.pdf";
-            contentType = MediaType.APPLICATION_PDF_VALUE;
-        }
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + filename + "\"")
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(file);
-        } catch (Exception ex) {
-            log.error("Error exportando dashboard", ex);
-            return ResponseEntity.internalServerError()
-                .contentType(MediaType.TEXT_PLAIN)
-                .body("No se pudo generar el archivo de exportación.".getBytes());
-        }
     }
 
     private Map<String, Long> ensureLabels(Map<String, Long> original, String[] expectedLabels) {

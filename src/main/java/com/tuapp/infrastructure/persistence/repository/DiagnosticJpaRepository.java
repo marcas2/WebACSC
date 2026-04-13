@@ -128,4 +128,24 @@ public interface DiagnosticJpaRepository extends JpaRepository<DiagnosticEntity,
         ORDER BY date_trunc('month', d.created_at)
     """, nativeQuery = true)
     List<Object[]> countByMonth();
+
+    @Query("""
+            SELECT DISTINCT d
+            FROM DiagnosticEntity d
+            JOIN FETCH d.institucion i
+            JOIN FETCH d.foco f
+            JOIN FETCH d.categoriaAnomalia c
+            LEFT JOIN FETCH d.enfermedadesBase eb
+            ORDER BY d.creadoEn DESC, d.id DESC
+    """)
+    List<DiagnosticEntity> findAllForDashboardFilters();
+
+        @Query("""
+                SELECT DISTINCT UPPER(TRIM(d.genero))
+                FROM DiagnosticEntity d
+                WHERE d.genero IS NOT NULL
+                    AND TRIM(d.genero) <> ''
+                ORDER BY UPPER(TRIM(d.genero))
+        """)
+        List<String> findDistinctGeneros();
 }

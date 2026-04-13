@@ -129,6 +129,72 @@
             border-radius: 2px;
             flex-shrink: 0;
         }
+
+        .filters {
+            margin: 0 2rem 1rem;
+            background: #fff;
+            border: 1px solid #eaeef5;
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .filter-item label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .filter-item input,
+        .filter-item select {
+            width: 100%;
+            border: 1px solid #d6deea;
+            border-radius: 6px;
+            padding: 7px 8px;
+            font-size: 13px;
+            color: #1a1a2e;
+            background: #fff;
+        }
+
+        .filter-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            font-size: 13px;
+            border-radius: 6px;
+            text-decoration: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .btn-muted {
+            background: #f5f7fb;
+            color: #1a1a2e;
+            border-color: #d6deea;
+        }
+
+        .active-filter-note {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #3266ad;
+        }
     </style>
 </head>
 <body>
@@ -189,6 +255,87 @@
         font-size: 14px;">
     ⚠️ <span th:text="${errorMessage}"></span>
 </div>
+
+<form class="filters" method="get" th:action="@{/dashboard}">
+    <p style="margin:0; font-size:12px; color:#888;">Buscador y filtros del dashboard</p>
+    <div class="filters-grid">
+        <div class="filter-item">
+            <label for="q">Texto diagnóstico</label>
+            <input id="q" name="q" type="text" th:value="${filtroQ}" placeholder="Ej: soplo sistólico">
+        </div>
+        <div class="filter-item">
+            <label for="institucionId">Institución</label>
+            <select id="institucionId" name="institucionId">
+                <option value="">Todas</option>
+                <option th:each="entry : ${institucionOptions}"
+                        th:value="${entry.key}"
+                        th:text="${entry.value}"
+                        th:selected="${filtroInstitucionId != null and filtroInstitucionId == entry.key}"></option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label for="focoId">Foco</label>
+            <select id="focoId" name="focoId">
+                <option value="">Todos</option>
+                <option th:each="entry : ${focoOptions}"
+                        th:value="${entry.key}"
+                        th:text="${entry.value}"
+                        th:selected="${filtroFocoId != null and filtroFocoId == entry.key}"></option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label for="categoriaId">Categoría anomalía</label>
+            <select id="categoriaId" name="categoriaId">
+                <option value="">Todas</option>
+                <option th:each="entry : ${categoriaOptions}"
+                        th:value="${entry.key}"
+                        th:text="${entry.value}"
+                        th:selected="${filtroCategoriaId != null and filtroCategoriaId == entry.key}"></option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label for="genero">Género</label>
+            <select id="genero" name="genero">
+                <option value="">Todos</option>
+                <option th:each="g : ${generoOptions}"
+                        th:value="${g}"
+                        th:text="${g}"
+                        th:selected="${filtroGenero != null and filtroGenero == g}"></option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label for="edadMin">Edad mínima</label>
+            <input id="edadMin" name="edadMin" type="number" min="0" th:value="${filtroEdadMin}">
+        </div>
+        <div class="filter-item">
+            <label for="edadMax">Edad máxima</label>
+            <input id="edadMax" name="edadMax" type="number" min="0" th:value="${filtroEdadMax}">
+        </div>
+        <div class="filter-item">
+            <label for="desde">Desde</label>
+            <input id="desde" name="desde" type="date" th:value="${filtroDesde}">
+        </div>
+        <div class="filter-item">
+            <label for="hasta">Hasta</label>
+            <input id="hasta" name="hasta" type="date" th:value="${filtroHasta}">
+        </div>
+        <div class="filter-item">
+            <label for="conEnfermedadBase">Enfermedad de base</label>
+            <select id="conEnfermedadBase" name="conEnfermedadBase">
+                <option value="">Todos</option>
+                <option value="true" th:selected="${filtroConEnfermedadBase != null and filtroConEnfermedadBase}">Con enfermedad base</option>
+                <option value="false" th:selected="${filtroConEnfermedadBase != null and !filtroConEnfermedadBase}">Sin enfermedad base</option>
+            </select>
+        </div>
+    </div>
+    <div class="filter-actions">
+        <button class="btn btn-primary" type="submit">Aplicar filtros</button>
+        <a class="btn btn-muted" th:href="@{/dashboard}">Limpiar filtros</a>
+    </div>
+    <p class="active-filter-note" th:if="${hasActiveFilters}">
+        Se está visualizando un subconjunto de datos según los filtros aplicados.
+    </p>
+</form>
 
 <!-- El resto del dashboard solo se muestra si el reporte está listo -->
 <div th:if="${reportReady}">
@@ -281,12 +428,36 @@
 
     <div style="padding: 0 2rem 2rem; display: flex; gap: 12px; align-items: center;">
         <span style="font-size: 13px; color: #888;">Exportar reporte:</span>
-        <a th:href="@{/dashboard/export(format='pdf')}"
+        <a th:href="@{/dashboard/export(
+                    format='pdf',
+                    q=${filtroQ},
+                    institucionId=${filtroInstitucionId},
+                    focoId=${filtroFocoId},
+                    categoriaId=${filtroCategoriaId},
+                    genero=${filtroGenero},
+                    edadMin=${filtroEdadMin},
+                    edadMax=${filtroEdadMax},
+                    desde=${filtroDesde},
+                    hasta=${filtroHasta},
+                    conEnfermedadBase=${filtroConEnfermedadBase}
+                )}"
            style="padding: 7px 16px; font-size: 13px; border-radius: 6px;
                   background: #3266ad; color: #fff; text-decoration: none;">
             Descargar PDF
         </a>
-        <a th:href="@{/dashboard/export(format='excel')}"
+        <a th:href="@{/dashboard/export(
+                    format='excel',
+                    q=${filtroQ},
+                    institucionId=${filtroInstitucionId},
+                    focoId=${filtroFocoId},
+                    categoriaId=${filtroCategoriaId},
+                    genero=${filtroGenero},
+                    edadMin=${filtroEdadMin},
+                    edadMax=${filtroEdadMax},
+                    desde=${filtroDesde},
+                    hasta=${filtroHasta},
+                    conEnfermedadBase=${filtroConEnfermedadBase}
+                )}"
            style="padding: 7px 16px; font-size: 13px; border-radius: 6px;
                   background: #2d7a55; color: #fff; text-decoration: none;">
             Descargar Excel
