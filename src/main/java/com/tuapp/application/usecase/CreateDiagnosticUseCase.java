@@ -71,6 +71,7 @@ public class CreateDiagnosticUseCase {
         entity.setGenero(normalizeGender(request.getGenero()));
         entity.setAltura(request.getAltura());
         entity.setPeso(request.getPeso());
+        entity.setPrecision(request.getPrecision());
         entity.setDiagnosticoTexto(normalizeText(request.getDiagnosticoTexto()));
         entity.setVerificado(defaultBoolean(request.getVerificado()));
         entity.setValvulopatia(defaultBoolean(request.getValvulopatia()));

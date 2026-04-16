@@ -42,6 +42,8 @@ public class CreateDiagnosticRequest {
     @DecimalMax(value = "500.0", message = "peso no puede ser mayor que 500")
     private Double peso;
 
+    private Double precision;
+
     @NotBlank(message = "diagnosticoTexto es obligatorio")
     @Size(max = 5000, message = "diagnosticoTexto no puede superar 5000 caracteres")
     private String diagnosticoTexto;
@@ -108,6 +110,14 @@ public class CreateDiagnosticRequest {
 
     public void setPeso(Double peso) {
         this.peso = peso;
+    }
+
+    public Double getPrecision() {
+        return precision;
+    }
+
+    public void setPrecision(Double precision) {
+        this.precision = precision;
     }
 
     public String getDiagnosticoTexto() {

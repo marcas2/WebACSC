@@ -38,6 +38,9 @@ public class DiagnosticEntity {
     @Column(nullable = false)
     private Double peso;
 
+    @Column(name = "precision_valor")
+    private Double precision;
+
     @Column(nullable = false, length = 20)
     private String genero;
 
@@ -97,6 +100,9 @@ public class DiagnosticEntity {
 
     public Double getPeso() { return peso; }
     public void setPeso(Double peso) { this.peso = peso; }
+
+    public Double getPrecision() { return precision; }
+    public void setPrecision(Double precision) { this.precision = precision; }
 
     public String getGenero() { return genero; }
     public void setGenero(String genero) { this.genero = genero; }

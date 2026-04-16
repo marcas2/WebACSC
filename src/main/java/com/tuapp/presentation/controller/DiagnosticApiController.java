@@ -51,6 +51,7 @@ public class DiagnosticApiController {
         response.put("genero", saved.getGenero());
         response.put("altura", saved.getAltura());
         response.put("peso", saved.getPeso());
+        response.put("precision", saved.getPrecision());
         response.put("diagnosticoTexto", saved.getDiagnosticoTexto());
         response.put("verificado", saved.getVerificado());
         response.put("valvulopatia", saved.getValvulopatia());
@@ -131,6 +132,7 @@ public class DiagnosticApiController {
         item.put("valvulopatia", diagnostic.getValvulopatia());
         item.put("edad", diagnostic.getEdad());
         item.put("genero", diagnostic.getGenero());
+        item.put("precision", diagnostic.getPrecision());
         item.put("focoId", diagnostic.getFoco().getId());
         item.put("focoNombre", diagnostic.getFoco().getNombre());
         item.put("categoriaAnomaliaId", diagnostic.getCategoriaAnomalia().getId());

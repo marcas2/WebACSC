@@ -1,0 +1,2 @@
+ALTER TABLE diagnostics
+    ADD COLUMN IF NOT EXISTS precision_valor DOUBLE PRECISION;
